@@ -1,0 +1,212 @@
+components:
+  schemas:
+    AuthUserResponse: # User without password
+      type: object
+      required:
+        - id
+        - username
+        - email
+        - roleFk
+        - avatarPath
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+          description: The Username for the user (unique but not used for login - yet)
+        email:
+          type: string
+          description: User email (unique)
+        roleFk:
+          type: integer
+          format: int64
+        avatarPath:
+          type: string
+          description: Path to user avatar
+          nullable: true
+    AuthResponse: # tokens + user
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - csrfToken
+        - user
+      properties:
+        accessToken:
+          type: string
+          description: Access token
+        refreshToken:
+          type: string
+          description: Refresh token
+        csrfToken:
+          type: string
+          description: CSRF token (for XSRF protection)
+        user:
+          $ref: '#/components/schemas/AuthUserResponse'
+    User: # AuthUserRespone with password
+      allOf:
+        - $ref: '#/components/schemas/AuthUserResponse'
+        - type: object
+          required:
+            - password
+          properties:
+            password:
+              type: string
+              description: User password
+tags:
+  - name: Users
+    description: User management
+paths:
+  /login:
+    post:
+      tags:
+        - Users
+      summary: Login
+      description: Login
+      operationId: login
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: Login data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  description: User email (unique)
+                  example: 'test@example.de'
+                password:
+                  type: string
+                  description: User password
+                  example: 'User123'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: jwt=secrecttoken; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Login successful
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: JWT token
+                        example: secrecttoken
+                      user: # UserResponse
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Login failed
+  /register:
+    put:
+      tags:
+        - Users
+      summary: Register
+      description: Register
+      operationId: register
+      requestBody:
+        description: Register data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  description: User email (unique)
+                  example: 'newUser@example.de'
+                password:
+                  type: string
+                  description: User password
+                  example: 'User123'
+      responses:
+        '200':
+          description: Register successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: jwt=secrecttoken; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Register successful
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: JWT token
+                        example: secrecttoken
+                      user: # UserResponse
+                        $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Register failed
+  /user/status:
+    get:
+      tags:
+        - Users
+      summary: Get user status
+      description: Get user status
+      operationId: getUserStatus
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: User status
+                  data:
+                    type: object
+                    properties:
+                      user: # UserResponse
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: User status failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: User status failed
+                    example: false
+                  message:
+                    type: string
+                    description: Error message
+                    example: 'Authentication Error'
+                  data:
+                    type: string
+                    description: Error data
+                    example: 'Not logged in'

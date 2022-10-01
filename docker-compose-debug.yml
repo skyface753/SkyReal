@@ -1,0 +1,28 @@
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./data/db:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      PMA_HOST: db
+    ports:
+      - 8084:80
+    restart: always
+
+  redis:
+    image: bitnami/redis:latest
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes

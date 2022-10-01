@@ -1,0 +1,107 @@
+components:
+  schemas:
+    Avatar:
+      type: object
+      required:
+        - userFk
+        - originalName
+        - generatedPath
+        - type
+      properties:
+        userFk:
+          type: integer
+          format: int64
+        originalName:
+          type: string
+        generatedPath:
+          type: string
+        type:
+          type: string
+          enum:
+            - image/png
+            - image/jpeg
+            - image/gif
+tags:
+  - name: Avatars
+    description: Avatar management
+paths:
+  /files/avatar/upload:
+    put:
+      tags:
+        - Avatars
+      summary: Upload avatar
+      description: Upload avatar
+      operationId: uploadAvatar
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: Avatar data
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  nullable: false
+      responses:
+        "200":
+          description: Avatar uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Avatar uploaded
+                      avatar:
+                        $ref: "#/components/schemas/Avatar"
+
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+  /files/avatar/delete:
+    delete:
+      tags:
+        - Avatars
+      summary: Delete avatar
+      description: Delete avatar
+      operationId: deleteAvatar
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Avatar deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Avatar deleted
+
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error

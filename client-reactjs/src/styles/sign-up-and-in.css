@@ -1,0 +1,89 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+
+/* Full-width input fields */
+input[type='text'],
+input[type='password'] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  display: inline-block;
+  border: none;
+  background: #f1f1f1;
+}
+
+input[type='text']:focus,
+input[type='password']:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+hr {
+  border: 1px solid #f1f1f1;
+  margin-bottom: 25px;
+}
+
+/* Set a style for all buttons */
+.sign-in-up-btn {
+  background-color: #04aa6d;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  opacity: 0.9;
+}
+
+.sign-in-up-btn:hover {
+  opacity: 1;
+}
+
+/* Float cancel and signup buttons and add an equal width */
+.sign-in-up-btn {
+  /* float: left; */
+  width: 50%;
+}
+
+/* Add padding to container elements */
+.sign-in-up-container {
+  padding: 16px;
+}
+
+/* Clear floats */
+.clearfix::after {
+  content: '';
+  clear: both;
+  display: table;
+}
+
+/* Change styles for cancel button and signup button on extra small screens */
+@media screen and (max-width: 300px) {
+  .sign-in-up-btn {
+    width: 100%;
+  }
+}
+
+.mfa-container {
+  position: absolute;
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 10px;
+  height: 60%;
+  z-index: 1;
+  width: 70%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.5);
+}
+
+.mfa-error {
+  color: red;
+}
