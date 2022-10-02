@@ -3,12 +3,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DioService {
+  static String baseUrl = 'http://localhost:5000/api/';
+  static String serverUrl = 'http://localhost:5000/';
   static Dio geBaseDio() {
     // var adapter = BrowserHttpClientAdapter();
     // adapter.withCredentials = true;
     return Dio(
       BaseOptions(
-        baseUrl: 'http://localhost:5000/api/',
+        baseUrl: baseUrl,
         receiveDataWhenStatusError: true,
         validateStatus: (status) {
           // All to 500 except 401

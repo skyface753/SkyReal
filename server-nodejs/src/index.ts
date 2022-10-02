@@ -25,28 +25,28 @@ app.disable('x-powered-by');
 // CORS TODO: Change for Production
 // app.use(cors()); // Development
 app.use(
-  // Production
-  cors({
-    origin: [
-      'http://localhost:3000', // React
-      'http://localhost:3001', // Flutter
-      // "http://localhost:19006",
-    ],
-    credentials: true,
-  })
+	// Production
+	cors({
+		origin: [
+			'http://localhost:3000', // React
+			'http://localhost:3001', // Flutter
+			// "http://localhost:19006",
+		],
+		credentials: true,
+	})
 );
 
 // Helmet
 app.use(
-  helmet({
-    crossOriginResourcePolicy: process.env.MODE !== 'DEV',
-  })
+	helmet({
+		crossOriginResourcePolicy: process.env.MODE !== 'DEV',
+	})
 );
 
 // set up rate limiter to prevent brute force attacks
 const limiter = RateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 400000, // TODO: Change for Production
+	windowMs: 1 * 60 * 1000, // 1 minute
+	max: 400000, // TODO: Change for Production
 });
 app.use(limiter); //  apply to all requests
 
@@ -69,11 +69,11 @@ app.use(cookieParser());
 //   })
 // );
 if (process.env.MODE !== 'Test') {
-  app.use(morgan('combined'));
+	app.use(morgan('combined'));
 }
 
-// Files
-app.use('/files/avatars', express.static('files/avatars'));
+// Files uploads/reals
+app.use('/uploads/reals', express.static('uploads/reals'));
 
 // Routes
 // const routes = require("./routes/index");
@@ -82,9 +82,9 @@ app.use('/api/', routes);
 
 // Start Server
 if (process.env.MODE !== 'Test') {
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
+	app.listen(port, () => {
+		console.log(`Server running on port ${port}`);
+	});
 }
 
 export default app;

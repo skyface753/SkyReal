@@ -1,10 +1,12 @@
 import 'package:client_flutter/bloc/auth_bloc.dart';
 import 'package:client_flutter/components/appbar.dart';
+import 'package:client_flutter/components/ownPicture.dart';
 import 'package:client_flutter/pages/login.dart';
 import 'package:client_flutter/services/dio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:client_flutter/models/reals.dart';
 
 class HomePage extends StatefulWidget {
   static String routeName = '/home';
@@ -14,10 +16,34 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Dio dio = DioService().getApi();
+  List<Real> reals = [];
+
+  Future<void> _getReals() async {
+    dio.get('reals').then((response) {
+      print(response.data);
+      /*{
+    "success": true,
+    "data": {
+        "reals": [] // array of reals
+	    }
+	}*/
+      if (response.data['success']) {
+        setState(() {
+          reals = response.data['data']['reals']
+              .map<Real>((real) => Real.fromJson(real))
+              .toList();
+          for (var real in reals) {
+            print(real.frontPath);
+          }
+        });
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    _getReals();
   }
 
   Future<void> _loadData() async {
@@ -46,7 +72,7 @@ class _HomePageState extends State<HomePage> {
           }
           if (state is Authenticated) {
             return RefreshIndicator(
-                onRefresh: _loadData,
+                onRefresh: _getReals,
                 // child: SafeArea(
                 child: CustomScrollView(slivers: [
                   SliverFillRemaining(
@@ -56,15 +82,40 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         SizedBox(
                             height:
-                                Size.fromHeight(kToolbarHeight).height + 30),
+                                Size.fromHeight(kToolbarHeight).height + 50),
+                        // OwnPicture("URL", 200),
                         Text('Welcome ${state.authenticatedUser.username}'),
-                        SizedBox(height: 2000),
-                        Container(
-                          height: 50,
-                          color: Colors.red,
-                          // Full width
-                          width: double.infinity,
-                        )
+                        SizedBox(height: 200),
+                        SizedBox(
+                            // height: 400,
+                            width: double.infinity,
+                            child: ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: reals.length,
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                    // height: 100,
+                                    color: Colors.red,
+                                    width: double.infinity,
+                                    child: Stack(
+                                      children: [
+                                        Image.network(DioService.serverUrl +
+                                            reals[index].frontPath),
+                                        SizedBox(
+                                          height: 50,
+                                          width: 100,
+                                          child: Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Image.network(
+                                                DioService.serverUrl +
+                                                    reals[index].backPath),
+                                          ),
+                                        )
+                                      ],
+                                    ));
+                              },
+                            ))
                       ],
                     ),
                   )

@@ -1,5 +1,7 @@
 import 'package:client_flutter/pages/friends.dart';
+import 'package:client_flutter/pages/login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -17,6 +19,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.settings),
           onPressed: () {},
+        ),
+        // Logout
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () async {
+            FlutterSecureStorage storage = FlutterSecureStorage();
+            await storage.deleteAll();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            );
+          },
         ),
       ],
       leading: IconButton(
