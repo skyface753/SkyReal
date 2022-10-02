@@ -4,7 +4,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: database
+      MYSQL_DATABASE: skyrealdb
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:

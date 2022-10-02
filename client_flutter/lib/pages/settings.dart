@@ -1,5 +1,3 @@
-import 'dart:html' as html;
-
 import 'package:client_flutter/bloc/auth_bloc.dart';
 import 'package:client_flutter/pages/twofactor_settings.dart';
 import 'package:client_flutter/services/dio_service.dart';

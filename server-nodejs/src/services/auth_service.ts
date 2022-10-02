@@ -368,10 +368,14 @@ const AuthService = {
     await redisClient.del(refreshToken);
   },
   status: async (req: Request, res: Response) => {
-    const token = req.cookies.jwt;
+    // Token from cookie or Bearer
+    let token = req.cookies.token || req.headers.authorization;
     if (!token) {
       sendResponse.authError(res);
       return;
+    }
+    if (token.startsWith('Bearer ')) {
+      token = token.slice(7, token.length);
     }
     try {
       const decoded = jwt.verify(

@@ -36,6 +36,7 @@ class AuthRepository {
           userData['email'], userData['roleFk'], userData['avatar']);
       return userState;
     } else {
+      print(responseMap);
       throw Exception(responseMap['message']);
     }
   }

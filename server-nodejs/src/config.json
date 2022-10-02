@@ -4,7 +4,7 @@
     "host": "localhost",
     "user": "user",
     "password": "password",
-    "database": "database",
+    "database": "skyrealdb",
     "multipleStatements": false
   },
   "JWT_SECRET": "secret",
