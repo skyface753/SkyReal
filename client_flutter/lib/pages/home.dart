@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:client_flutter/bloc/auth_bloc.dart';
 import 'package:client_flutter/components/appbar.dart';
 import 'package:client_flutter/components/ownPicture.dart';
@@ -87,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                         Text('Welcome ${state.authenticatedUser.username}'),
                         SizedBox(height: 200),
                         SizedBox(
-                            // height: 400,
+                            height: 400,
                             width: double.infinity,
                             child: ListView.builder(
                               physics: NeverScrollableScrollPhysics(),
@@ -95,25 +96,44 @@ class _HomePageState extends State<HomePage> {
                               shrinkWrap: true,
                               itemBuilder: (context, index) {
                                 return Container(
-                                    // height: 100,
-                                    color: Colors.red,
-                                    width: double.infinity,
-                                    child: Stack(
+                                  // height: 100,
+                                  // color: Colors.red,
+                                  width: double.infinity,
+                                  child: Column(children: [
+                                    Stack(
                                       children: [
-                                        Image.network(DioService.serverUrl +
-                                            reals[index].frontPath),
+                                        CachedNetworkImage(
+                                          imageUrl: DioService.serverUrl +
+                                              reals[index].backPath,
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(
+                                                  value: downloadProgress
+                                                      .progress),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(Icons.error),
+                                        ),
                                         SizedBox(
                                           height: 50,
                                           width: 100,
                                           child: Align(
                                             alignment: Alignment.topLeft,
-                                            child: Image.network(
-                                                DioService.serverUrl +
-                                                    reals[index].backPath),
+                                            child: CachedNetworkImage(
+                                              imageUrl: DioService.serverUrl +
+                                                  reals[index].frontPath,
+                                              placeholder: (context, url) =>
+                                                  CircularProgressIndicator(),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Icon(Icons.error),
+                                            ),
                                           ),
                                         )
                                       ],
-                                    ));
+                                    ),
+                                    Text(reals[index].username),
+                                  ]),
+                                );
                               },
                             ))
                       ],

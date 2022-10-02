@@ -31,9 +31,9 @@ const RealsService = {
 		console.log('Friend IDs', friendIds);
 		// Get the latest Reals of the friends
 		const reals = await db.query(
-			`select reals.id, reals.userFk, createdAt, frontPath, backPath FROM reals INNER JOIN (SELECT userFk, MAX(createdAt) AS latest FROM reals WHERE userFk IN (${friendIds.join(
+			`select reals.id, reals.userFk, user.username, createdAt, frontPath, backPath FROM reals INNER JOIN (SELECT userFk, MAX(createdAt) AS latest FROM reals WHERE userFk IN (${friendIds.join(
 				','
-			)}) GROUP BY userFk) AS latestReals ON reals.userFk = latestReals.userFk AND reals.createdAt = latestReals.latest`,
+			)}) GROUP BY userFk) AS latestReals ON reals.userFk = latestReals.userFk AND reals.createdAt = latestReals.latest INNER JOIN user ON reals.userFk = user.id`,
 			[]
 		);
 

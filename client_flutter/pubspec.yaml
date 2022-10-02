@@ -43,6 +43,7 @@ dependencies:
   flutter_otp_text_field: ^1.1.1
   qr_flutter: ^4.0.0
   file_picker: ^5.2.0+1
+  cached_network_image: ^3.2.2
 
 dev_dependencies:
   flutter_test:
