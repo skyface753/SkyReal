@@ -41,11 +41,17 @@ const multi_upload = multer({
 		}
 	},
 }).array('uploadedImages', 2);
-router.post(
+router.put(
 	'/upload',
 
 	Middleware.authUser,
 	multi_upload,
 	RealsService.uploadReal
 );
+router.get(
+	'/own/front',
+	Middleware.authUser,
+	RealsService.getOwnLatestRealFront
+);
+router.get('/own/back', Middleware.authUser, RealsService.getOwnLatestRealBack);
 export default router;

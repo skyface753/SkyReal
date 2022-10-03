@@ -7,13 +7,13 @@ class UserState {
   String email;
   int roleFk;
   String? avatar;
-
-  UserState(this.id, this.username, this.email, this.roleFk, this.avatar);
-
+  String accessToken;
+  UserState(this.id, this.username, this.email, this.roleFk, this.avatar,
+      this.accessToken);
   // From Json
   factory UserState.fromJson(Map<String, dynamic> json) {
     return UserState(json['id'], json['username'], json['email'],
-        json['roleFk'], json['avatar']);
+        json['roleFk'], json['avatar'], json['accessToken']);
   }
 }
 
@@ -32,8 +32,13 @@ class AuthRepository {
       final Map data = responseMap['data'];
       await writeData(data: data);
       final Map userData = data['user'];
-      UserState userState = UserState(userData['id'], userData['username'],
-          userData['email'], userData['roleFk'], userData['avatar']);
+      UserState userState = UserState(
+          userData['id'],
+          userData['username'],
+          userData['email'],
+          userData['roleFk'],
+          userData['avatar'],
+          data['accessToken']);
       return userState;
     } else {
       print(responseMap);
@@ -71,26 +76,44 @@ class AuthRepository {
       {required String email,
       required String password,
       required String username}) async {
-    var response = await DioService.geBaseDio().put('auth/register', data: {
+    var resp = await DioService.geBaseDio().put('auth/register', data: {
       'email': email,
       'password': password,
       'username': username,
-    }).then((value) {
-      final Map response = value.data;
-      if (response['success']) {
-        print('Register Success');
-        final Map data = response['data'];
-        writeData(data: data);
-        return data['user'];
-      } else {
-        throw Exception("Something went wrong");
-      }
-    }).catchError((error) {
-      throw Exception("Register Failed");
     });
-    UserState user = UserState(response['id'], response['username'],
-        response['email'], response['roleFk'], response['avatar']);
-    return user;
+    final Map responseMap = resp.data;
+    if (responseMap['success']) {
+      final Map data = responseMap['data'];
+      await writeData(data: data);
+      final Map userData = data['user'];
+      UserState userState = UserState(
+          userData['id'],
+          userData['username'],
+          userData['email'],
+          userData['roleFk'],
+          userData['avatar'],
+          data['accessToken']);
+      return userState;
+    } else {
+      throw Exception(responseMap['message']);
+    }
+
+    // .then((value) {
+    //   final Map response = value.data;
+    //   if (response['success']) {
+    //     print('Register Success');
+    //     final Map data = response['data'];
+    //     writeData(data: data);
+    //     return data['user'];
+    //   } else {
+    //     throw Exception("Something went wrong");
+    //   }
+    // }).catchError((error) {
+    //   throw Exception("Register Failed");
+    // });
+    // UserState user = UserState(response['id'], response['username'],
+    //     response['email'], response['roleFk'], response['avatar'],
+    // return user;
     //     .signInWithEmailAndPassword(email: email, password: password);
   }
 
@@ -126,8 +149,8 @@ class AuthRepository {
         email != null &&
         roleFk != null) {
       print("User is signed in");
-      return UserState(
-          int.parse(userId), username, email, int.parse(roleFk), avatar);
+      return UserState(int.parse(userId), username, email, int.parse(roleFk),
+          avatar, accessToken);
     } else {
       return null;
     }

@@ -60,5 +60,41 @@ const RealsService = {
 		console.log('Result', result);
 		sendResponse.success(res, { message: 'Real uploaded' });
 	},
+	getOwnLatestRealFront: async (
+		req: IUserFromCookieInRequest,
+		res: Response
+	) => {
+		const reqUser = req.user;
+		const latestRealForUser = await db.query(
+			`SELECT * FROM reals WHERE userFk = ? ORDER BY createdAt DESC LIMIT 1`,
+			[reqUser?.id]
+		);
+		if (latestRealForUser.length === 0) {
+			return sendResponse.success(res, { real: null });
+		} else {
+			console.log('Latest Real', latestRealForUser);
+			res.sendFile(latestRealForUser[0].frontPath, {
+				root: '.',
+			});
+		}
+	},
+	getOwnLatestRealBack: async (
+		req: IUserFromCookieInRequest,
+		res: Response
+	) => {
+		const reqUser = req.user;
+		const latestRealForUser = await db.query(
+			`SELECT * FROM reals WHERE userFk = ? ORDER BY createdAt DESC LIMIT 1`,
+			[reqUser?.id]
+		);
+		if (latestRealForUser.length === 0) {
+			return sendResponse.success(res, { real: null });
+		} else {
+			console.log('Latest Real', latestRealForUser);
+			res.sendFile(latestRealForUser[0].backPath, {
+				root: '.',
+			});
+		}
+	},
 };
 export default RealsService;

@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DioService {
   static String baseUrl = 'http://localhost:5000/api/';
-  static String serverUrl = 'http://localhost:5000/';
+  static String serverUrl = 'http://localhost:5000/api/';
   static Dio geBaseDio() {
     // var adapter = BrowserHttpClientAdapter();
     // adapter.withCredentials = true;

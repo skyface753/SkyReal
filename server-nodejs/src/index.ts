@@ -72,9 +72,6 @@ if (process.env.MODE !== 'Test') {
 	app.use(morgan('combined'));
 }
 
-// Files uploads/reals
-app.use('/uploads/reals', express.static('uploads/reals'));
-
 // Routes
 // const routes = require("./routes/index");
 import routes from './routes/index';

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:client_flutter/bloc/auth_bloc.dart';
 import 'package:client_flutter/components/appbar.dart';
@@ -8,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:client_flutter/models/reals.dart';
+import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 
 class HomePage extends StatefulWidget {
   static String routeName = '/home';
@@ -18,7 +21,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Dio dio = DioService().getApi();
   List<Real> reals = [];
-
   Future<void> _getReals() async {
     dio.get('reals').then((response) {
       print(response.data);
@@ -74,73 +76,144 @@ class _HomePageState extends State<HomePage> {
           if (state is Authenticated) {
             return RefreshIndicator(
                 onRefresh: _getReals,
+                notificationPredicate: (notification) {
+                  // with NestedScrollView local(depth == 2) OverscrollNotification are not sent
+                  return notification.depth == 1;
+                },
+                displacement: 100,
                 // child: SafeArea(
-                child: CustomScrollView(slivers: [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                            height:
-                                Size.fromHeight(kToolbarHeight).height + 50),
-                        // OwnPicture("URL", 200),
-                        Text('Welcome ${state.authenticatedUser.username}'),
-                        SizedBox(height: 200),
-                        SizedBox(
-                            height: 400,
-                            width: double.infinity,
-                            child: ListView.builder(
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: reals.length,
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  // height: 100,
-                                  // color: Colors.red,
-                                  width: double.infinity,
-                                  child: Column(children: [
-                                    Stack(
-                                      children: [
+                child: NestedScrollView(
+                    headerSliverBuilder:
+                        (BuildContext context, bool innerBoxIsScrolled) {
+                      return <Widget>[
+                        SliverPadding(
+                            padding: EdgeInsets.only(
+                                top: Size.fromHeight(kToolbarHeight).height +
+                                    50),
+                            sliver: SliverAppBar(
+// Own Real
+                                // expandedHeight: 200.0,
+                                floating: false,
+                                pinned: false,
+                                flexibleSpace: FlexibleSpaceBar(
+                                    centerTitle: true,
+                                    background: Padding(
+                                      padding:
+                                          EdgeInsets.fromLTRB(50, 10, 50, 10),
+                                      child: Stack(children: [
                                         CachedNetworkImage(
-                                          imageUrl: DioService.serverUrl +
-                                              reals[index].backPath,
-                                          progressIndicatorBuilder: (context,
-                                                  url, downloadProgress) =>
-                                              CircularProgressIndicator(
-                                                  value: downloadProgress
-                                                      .progress),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
-                                        ),
-                                        SizedBox(
-                                          height: 50,
-                                          width: 100,
-                                          child: Align(
-                                            alignment: Alignment.topLeft,
+                                            httpHeaders: {
+                                              'Authorization':
+                                                  'Bearer ${state.authenticatedUser.accessToken}'
+                                            },
+                                            imageUrl: DioService.serverUrl +
+                                                'reals/own/front',
+                                            fit: BoxFit.cover),
+                                        Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Container(
+                                            height: 50,
+                                            width: 50,
                                             child: CachedNetworkImage(
-                                              imageUrl: DioService.serverUrl +
-                                                  reals[index].frontPath,
-                                              placeholder: (context, url) =>
-                                                  CircularProgressIndicator(),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      Icon(Icons.error),
-                                            ),
+                                                httpHeaders: {
+                                                  'Authorization':
+                                                      'Bearer ${state.authenticatedUser.accessToken}'
+                                                },
+                                                imageUrl: DioService.serverUrl +
+                                                    'reals/own/back',
+                                                fit: BoxFit.cover),
                                           ),
-                                        )
-                                      ],
+                                        ),
+                                      ]),
+                                    )
+
+                                    // imageUrl:
+                                    // 'https://picsum.photos/250?image=9',
+                                    // fit: BoxFit.cover,
+                                    // placeholder: (context, url) =>
+                                    // CircularProgressIndicator(),
+                                    // errorWidget: (context, url, error) =>
+                                    // Icon(Icons.error),
+                                    // )),
+                                    )))
+                      ];
+                    },
+                    body: ListView.builder(
+                      itemCount: reals.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                            padding: EdgeInsets.only(top: 20),
+                            child: Column(children: [
+                              Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                      padding:
+                                          EdgeInsets.only(left: 10, bottom: 10),
+                                      child: Row(children: [
+                                        ProfilePicture(
+                                          name: reals[index].username,
+                                          radius: 25,
+                                          fontsize: 17,
+                                        ),
+                                        Padding(
+                                            padding: EdgeInsets.only(left: 10),
+                                            child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Text(reals[index].username),
+                                                  Text(reals[index].createdAt)
+                                                ]))
+                                      ]))),
+                              Stack(
+                                children: [
+                                  CachedNetworkImage(
+                                    httpHeaders: {
+                                      'Authorization':
+                                          'Bearer ${state.authenticatedUser.accessToken}'
+                                    },
+                                    imageUrl: DioService.serverUrl +
+                                        reals[index].backPath +
+                                        '?v=' +
+                                        DateTime.now()
+                                            .millisecondsSinceEpoch
+                                            .toString(),
+                                    progressIndicatorBuilder: (context, url,
+                                            downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  ),
+                                  SizedBox(
+                                    height: 50,
+                                    width: 100,
+                                    child: Align(
+                                      alignment: Alignment.topLeft,
+                                      child: CachedNetworkImage(
+                                        httpHeaders: {
+                                          'Authorization':
+                                              'Bearer ${state.authenticatedUser.accessToken}'
+                                        },
+                                        imageUrl: DioService.serverUrl +
+                                            reals[index].frontPath +
+                                            '?${DateTime.now().millisecondsSinceEpoch.toString()}',
+                                        placeholder: (context, url) =>
+                                            CircularProgressIndicator(),
+                                        errorWidget: (context, url, error) =>
+                                            Icon(Icons.error),
+                                      ),
                                     ),
-                                    Text(reals[index].username),
-                                  ]),
-                                );
-                              },
-                            ))
-                      ],
-                    ),
-                  )
-                ]));
+                                  )
+                                ],
+                              ),
+                            ]));
+                      },
+                    )));
           }
+
           // print(state);
           return Center(
             child: Text("Not Authenticated - ERROR"),
