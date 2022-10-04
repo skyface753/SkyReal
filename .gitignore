@@ -2,3 +2,5 @@ server-nodejs/node_modules
 data/db
 server-nodejs/files/avatars/**
 server-nodejs/src/config.json
+master-python/.env
+master-python/.env
