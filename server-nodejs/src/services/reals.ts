@@ -45,108 +45,17 @@ type Friendship = {
   friend: number;
 };
 
-function createNewRandomDate() {
-  // Create new time between tomorrow 10am and 11:59
-  const start = new Date();
-  start.setDate(start.getDate() + 1);
-  start.setHours(10);
-  start.setMinutes(0);
-  start.setSeconds(0);
-  const end = new Date();
-  end.setDate(end.getDate() + 1);
-  end.setHours(23);
-  end.setMinutes(59);
-  end.setSeconds(59);
-  //   DEV - 30 seconds
-  //   const start = new Date();
-  //   start.setSeconds(start.getSeconds() + 100);
-  //   const end = new Date();
-  //   end.setSeconds(end.getSeconds() + 200);
-  const newDate = new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime())
-  );
-  return newDate;
-}
-
-let lastRealTimestamp: Date | null = null;
-let nextRealTimestamp: Date | null = null;
-async function realsTime() {
-  const isMasterNode =
-    process.env.MODE === 'master' || process.env.MODE === 'DEV';
-  if (isMasterNode) {
-    console.log('IS MASTER NODE - MANAGES AND PUSH REALS TIME');
+// Get lastRealTimestamp from Redis
+async function getLastRealTimestamp() {
+  const lastRealTimestampFromRedis = await redisClient.get('lastRealTimestamp');
+  if (lastRealTimestampFromRedis) {
+    // E.g 1664924762.14826
+    const date = new Date(parseFloat(lastRealTimestampFromRedis) * 1000);
+    return date.toISOString().replace('T', ' ').replace('Z', '');
+  } else {
+    return null;
   }
-  const interval = setInterval(async () => {
-    // Get lastRealTimestamp from Redis
-    const lastRealTimestampFromRedis = await redisClient.get(
-      'lastRealTimestamp'
-    );
-    const nextRealTimestampFromRedis = await redisClient.get(
-      'nextRealTimestamp'
-    );
-    if (!nextRealTimestampFromRedis) {
-      if (isMasterNode) {
-        nextRealTimestamp = createNewRandomDate();
-        await redisClient.set(
-          'nextRealTimestamp',
-          nextRealTimestamp.toString()
-        );
-      }
-    } else {
-      nextRealTimestamp = new Date(nextRealTimestampFromRedis);
-      if (isMasterNode && new Date() > nextRealTimestamp) {
-        lastRealTimestamp = nextRealTimestamp;
-        nextRealTimestamp = createNewRandomDate();
-        await redisClient.set(
-          'nextRealTimestamp',
-          nextRealTimestamp.toString()
-        );
-        await redisClient.set(
-          'lastRealTimestamp',
-          lastRealTimestamp.toString()
-        );
-        // Send Push to Clients
-        const ONESIGNAL_APP_ID = config.OneSignal.appID;
-
-        const app_key_provider = {
-          getToken() {
-            return config.OneSignal.restAPIKey;
-          },
-        };
-
-        const configuration = OneSignal.createConfiguration({
-          authMethods: {
-            app_key: {
-              tokenProvider: app_key_provider,
-            },
-          },
-        });
-        const client = new OneSignal.DefaultApi(configuration);
-
-        const notification = new OneSignal.Notification();
-        notification.app_id = ONESIGNAL_APP_ID;
-        notification.included_segments = ['Subscribed Users'];
-        notification.contents = {
-          en: 'Time for a new real!',
-        };
-        const { id } = await client.createNotification(notification);
-        console.log('Notification sent: ' + id);
-      }
-    }
-    // const humanReadableLastRealTimestamp = lastRealTimestamp?.toLocaleString();
-    // const humanReadableNextRealTimestamp = nextRealTimestamp?.toLocaleString();
-    // console.log(
-    //   `lastRealTimestamp: ${humanReadableLastRealTimestamp} - nextRealTimestamp: ${humanReadableNextRealTimestamp}`
-    // );
-    if (lastRealTimestampFromRedis) {
-      lastRealTimestamp = new Date(lastRealTimestampFromRedis);
-    } else {
-      lastRealTimestamp = null;
-    }
-  }, 1000);
 }
-
-realsTime();
 
 const RealsService = {
   getReals: async (req: IUserFromCookieInRequest, res: Response) => {
@@ -162,16 +71,13 @@ const RealsService = {
       return friendship.friend;
     });
     console.log('Friend IDs', friendIds);
+    const lastRealTimestamp = await getLastRealTimestamp();
     if (!lastRealTimestamp) {
       return sendResponse.success(res, {
         reals: [],
       });
     }
-    // lastRealTimestamp (2022-10-03T21:22:17.000Z) to format 2022-10-03 20:52:11
-    const lastRealTimestampFormatted = lastRealTimestamp
-      .toISOString()
-      .replace('T', ' ')
-      .replace('Z', '');
+    console.log('lastRealTimestamp', lastRealTimestamp);
 
     // console.log('lastRealTimestamp', lastRealTimestamp);
     // Get the latest Reals of the friends
@@ -179,7 +85,7 @@ const RealsService = {
       `select reals.id, reals.userFk, user.username, createdAt, frontPath, backPath, timespan FROM reals INNER JOIN (SELECT userFk, MAX(createdAt) AS latest FROM reals WHERE userFk IN (${friendIds.join(
         ',' // Not older than lastRealTimestamp
       )}) GROUP BY userFk) AS latestReals ON reals.userFk = latestReals.userFk AND reals.createdAt = latestReals.latest INNER JOIN user ON reals.userFk = user.id WHERE reals.createdAt >= str_to_date(?, '%Y-%m-%d %H:%i:%s')`,
-      [lastRealTimestampFormatted]
+      [lastRealTimestamp]
       //   [lastRealTimestamp.toString()]
     );
     // Timespan (bigint) to human readable
@@ -206,6 +112,7 @@ const RealsService = {
       res.status(400).send('Please upload 2 files');
       return;
     }
+    const lastRealTimestamp = await getLastRealTimestamp();
     if (lastRealTimestamp == null) {
       res.status(400).send('Please wait for the next real');
       return;
@@ -235,6 +142,7 @@ const RealsService = {
     res: Response
   ) => {
     const reqUser = req.user;
+    const lastRealTimestamp = await getLastRealTimestamp();
     const latestRealForUser = await db.query(
       `SELECT * FROM reals WHERE userFk = ? AND createdAt >= ? ORDER BY createdAt DESC LIMIT 1`,
       [reqUser?.id, lastRealTimestamp]
@@ -253,6 +161,7 @@ const RealsService = {
     res: Response
   ) => {
     const reqUser = req.user;
+    const lastRealTimestamp = await getLastRealTimestamp();
     const latestRealForUser = await db.query(
       `SELECT * FROM reals WHERE userFk = ? AND createdAt >= ? ORDER BY createdAt DESC LIMIT 1`,
       [reqUser?.id, lastRealTimestamp]
