@@ -10,6 +10,18 @@ import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import RateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+
+// const notification = new OneSignal.Notification();
+// notification.app_id = ONESIGNAL_APP_ID;
+// notification.included_segments = ['Subscribed Users'];
+// notification.contents = {
+//   en: 'Hello OneSignal!',
+// };
+// (async () => {
+//   const { id } = await client.createNotification(notification);
+
+//   console.log('Notification created with id: ', id);
+// })();
 // import
 // const helmet = require("helmet");
 // const morgan = require("morgan");
@@ -17,7 +29,7 @@ import morgan from 'morgan';
 // var cookieSession = require('cookie-session');
 // Variables
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 // Reduce Fingerprinting
 app.disable('x-powered-by');
@@ -25,28 +37,29 @@ app.disable('x-powered-by');
 // CORS TODO: Change for Production
 // app.use(cors()); // Development
 app.use(
-	// Production
-	cors({
-		origin: [
-			'http://localhost:3000', // React
-			'http://localhost:3001', // Flutter
-			// "http://localhost:19006",
-		],
-		credentials: true,
-	})
+  // Production
+  cors({
+    origin: [
+      'http://localhost:3000', // React
+      'http://localhost:3001', // Flutter
+      // "http://localhost:19006",
+    ],
+    credentials: true,
+  })
 );
 
 // Helmet
 app.use(
-	helmet({
-		crossOriginResourcePolicy: process.env.MODE !== 'DEV',
-	})
+  helmet({
+    // crossOriginResourcePolicy: true,
+    crossOriginResourcePolicy: process.env.MODE !== 'DEV',
+  })
 );
 
 // set up rate limiter to prevent brute force attacks
 const limiter = RateLimit({
-	windowMs: 1 * 60 * 1000, // 1 minute
-	max: 400000, // TODO: Change for Production
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 400000, // TODO: Change for Production
 });
 app.use(limiter); //  apply to all requests
 
@@ -69,7 +82,7 @@ app.use(cookieParser());
 //   })
 // );
 if (process.env.MODE !== 'Test') {
-	app.use(morgan('combined'));
+  app.use(morgan('combined'));
 }
 
 // Routes
@@ -79,9 +92,9 @@ app.use('/api/', routes);
 
 // Start Server
 if (process.env.MODE !== 'Test') {
-	app.listen(port, () => {
-		console.log(`Server running on port ${port}`);
-	});
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
 }
 
 export default app;
