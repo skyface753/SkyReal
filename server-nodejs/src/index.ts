@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import RateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import compression from 'compression';
 
 // const notification = new OneSignal.Notification();
 // notification.app_id = ONESIGNAL_APP_ID;
@@ -52,7 +53,7 @@ app.use(
 app.use(
   helmet({
     // crossOriginResourcePolicy: true,
-    crossOriginResourcePolicy: process.env.MODE !== 'DEV',
+    crossOriginResourcePolicy: process.env.NODE_ENV !== 'development',
   })
 );
 
@@ -69,6 +70,9 @@ app.use(bodyParser.json());
 // Cookie Parser
 app.use(cookieParser());
 
+// Compression
+app.use(compression());
+
 // set up the cookie for the session
 // app.use(
 //   cookieSession({
@@ -77,11 +81,11 @@ app.use(cookieParser());
 //     maxAge: 24 * 60 * 60 * 1000, // cookie's lifespan -> 1 day
 //     sameSite: 'lax', // controls when cookies are sent
 //     path: '/', // explicitly set this for security purposes
-//     secure: process.env.MODE !== 'DEV', // cookie only sent on HTTPS
+//     secure: process.env.NODE_ENV !== 'development', // cookie only sent on HTTPS
 //     httpOnly: true, // cookie is not available to JavaScript (client)
 //   })
 // );
-if (process.env.MODE !== 'Test') {
+if (process.env.NODE_ENV !== 'development') {
   app.use(morgan('combined'));
 }
 

@@ -472,8 +472,8 @@ async function createAndSendTokens(res: Response, userId: number) {
   });
   res.cookie('jwt', accessToken, {
     httpOnly: true,
-    // secure: process.env.MODE !== 'DEV',
-    secure: false,
+    secure: process.env.NODE_ENV !== 'development',
+    // secure: false,
     sameSite: 'strict',
     // Max age is 7 days
     maxAge: 1000 * 60 * 60 * 24 * 7,
