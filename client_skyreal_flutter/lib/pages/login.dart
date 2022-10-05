@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:skyreal/pages/take_real.dart';
 
 class LoginPage extends StatefulWidget {
   static String routeName = '/login';
@@ -105,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             Text(
                               'Don\'t have an account?',
-                              style: TextStyle(fontSize: 25.0),
+                              style: TextStyle(fontSize: 20.0),
                             ),
                             GestureDetector(
                               onTap: () {

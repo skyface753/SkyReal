@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:skyreal/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skyreal/services/dio_service.dart';
 
 class FriendsPage extends StatefulWidget {
   @override
@@ -12,6 +14,8 @@ class _FriendsPageState extends State<FriendsPage> {
   void initState() {
     super.initState();
   }
+
+  TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,14 +49,42 @@ class _FriendsPageState extends State<FriendsPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         SizedBox(height: 20),
-                        Text('Welcome ${state.authenticatedUser.username}'),
-                        SizedBox(height: 2000),
-                        Container(
-                          height: 50,
-                          color: Colors.red,
-                          // Full width
-                          width: double.infinity,
-                        )
+                        TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search',
+                            prefixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                            child: Text("Send Request"),
+                            onPressed: () async {
+                              Dio dioService = DioService().getApi(state);
+                              await dioService.post('friends/add', data: {
+                                'recipient': _searchController.text
+                              }).then((response) {
+                                if (response.data['success']) {
+                                  print(response.data['data']);
+                                  // Show toast
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(response.data['data']),
+                                    duration: Duration(seconds: 3),
+                                  ));
+                                } else {
+                                  // Show toast
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(response.data['message']),
+                                    duration: Duration(seconds: 3),
+                                  ));
+                                }
+                              });
+                            }),
                       ],
                     ),
                   )

@@ -10,7 +10,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   //Remove this method to stop OneSignal Debugging
-  OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+  // OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
 
   OneSignal.shared.setAppId("01c10689-c5cd-4691-986b-c8f8be9040c3");
 

@@ -28,13 +28,15 @@ const multi_upload = multer({
 		if (
 			file.mimetype == 'image/png' ||
 			file.mimetype == 'image/jpg' ||
-			file.mimetype == 'image/jpeg'
+			file.mimetype == 'image/jpeg' ||
+			file.mimetype == 'application/octet-stream'
 		) {
 			cb(null, true);
 		} else {
 			cb(null, false);
 			const err = new Error(
-				'Only .png, .jpg and .jpeg format allowed!'
+				'Only .png, .jpg and .jpeg format allowed!: ' +
+					file.mimetype
 			);
 			err.name = 'ExtensionError';
 			return cb(err);

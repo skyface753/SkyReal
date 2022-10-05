@@ -6,6 +6,7 @@ import 'package:skyreal/components/appbar.dart';
 import 'package:skyreal/components/ownPicture.dart';
 import 'package:skyreal/components/showReal.dart';
 import 'package:skyreal/pages/login.dart';
+import 'package:skyreal/pages/take_real.dart';
 import 'package:skyreal/services/dio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -129,12 +130,22 @@ class _HomePageState extends State<HomePage> {
                                                     (context, url, error) {
                                                   ownRealEmpty = true;
                                                   return Container(
-                                                    width: 100,
-                                                    height: 100,
-                                                    child: Center(
-                                                      child: Text('No Real'),
-                                                    ),
-                                                  );
+                                                      width: 100,
+                                                      height: 100,
+                                                      child: Center(
+                                                        child: ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder:
+                                                                        (context) =>
+                                                                            TakePictureScreen()));
+                                                          },
+                                                          child:
+                                                              Text('Add Real'),
+                                                        ),
+                                                      ));
                                                 },
                                                 imageUrl: DioService.serverUrl +
                                                     'reals/own/back' +
@@ -168,6 +179,11 @@ class _HomePageState extends State<HomePage> {
                                                         DateTime.now()
                                                             .millisecondsSinceEpoch
                                                             .toString(),
+                                                    errorWidget:
+                                                        (context, url, error) {
+                                                      ownRealEmpty = true;
+                                                      return Container();
+                                                    },
                                                     fit: BoxFit.cover),
                                               ),
                                             )

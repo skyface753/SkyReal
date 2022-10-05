@@ -1,0 +1,6 @@
+flask
+threaded
+datetime
+redis
+python-dotenv
+onesignal-sdk

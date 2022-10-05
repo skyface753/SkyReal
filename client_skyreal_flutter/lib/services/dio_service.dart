@@ -4,8 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:skyreal/bloc/auth_bloc.dart';
 
 class DioService {
-  static String baseUrl = 'http://localhost:5000/api/';
-  static String serverUrl = 'http://localhost:5000/api/';
+  static String baseUrl = 'http://192.168.178.130:5000/api/';
+  static String serverUrl = 'http://192.168.178.130:5000/api/';
 
   static Dio geBaseDio() {
     // var adapter = BrowserHttpClientAdapter();
