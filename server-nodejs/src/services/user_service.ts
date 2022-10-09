@@ -49,7 +49,7 @@ const UserService = {
 	},
 	getSettings: async (req: IUserFromCookieInRequest, res: Response) => {
 		const user = await db.query(
-			'SELECT * FROM user LEFT JOIN user_2fa ON user_2fa.userFk = user.id LEFT JOIN avatar ON avatar.userFk = user.id WHERE id = ?',
+			'SELECT * FROM user LEFT JOIN user_2fa ON user_2fa.userFk = user.id WHERE id = ?',
 			[req.user?.id]
 		);
 		if (user.length === 0) {
@@ -59,7 +59,6 @@ const UserService = {
 		sendResponse.success(res, {
 			username: user[0].username,
 			email: user[0].email,
-			avatar: user[0].generatedPath,
 			twoFactorEnabled:
 				user[0].verified && user[0].secretBase32
 					? true

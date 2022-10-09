@@ -1,3 +1,4 @@
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:skyreal/services/dio_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -19,11 +20,14 @@ class UserState {
 
 class AuthRepository {
   Future<Object?> signIn(
-      {required String email,
+      {required String username,
       required String password,
       String? totpCode}) async {
-    var resp = await DioService.geBaseDio().post('auth/login',
-        data: {'email': email, 'password': password, 'totpCode': totpCode});
+    var resp = await DioService.geBaseDio().post('auth/login', data: {
+      'username': username,
+      'password': password,
+      'totpCode': totpCode
+    });
     if (resp.statusCode == 400 && resp.data['message'] == '2FA required') {
       return "2FA";
     }
@@ -39,10 +43,11 @@ class AuthRepository {
           userData['roleFk'],
           userData['avatar'],
           data['accessToken']);
+      await OneSignal.shared.setExternalUserId(userState.id.toString());
       return userState;
     } else {
       print(responseMap);
-      throw Exception(responseMap['message']);
+      throw Exception(responseMap['message'] + "UDJWF");
     }
   }
 
@@ -124,9 +129,12 @@ class AuthRepository {
       await DioService.geBaseDio().post('auth/logout', data: {
         'refreshToken': refreshToken,
       }).then((value) {});
+      OneSignal.shared.removeExternalUserId();
+
       await clearData();
     } catch (e) {
       print(e);
+      OneSignal.shared.removeExternalUserId();
       await clearData();
     }
   }

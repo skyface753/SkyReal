@@ -69,55 +69,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: Text('Email'),
                   subtitle: Text(settingsData!.email),
                 ),
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    if (state is Authenticated) {
-                      return ListTile(
-                        title: Text('Avatar'),
-                        subtitle: Text(settingsData!.avatar ?? 'No avatar'),
-                        onTap: () async {
-                          FilePickerResult? result =
-                              await FilePicker.platform.pickFiles();
-
-                          if (result != null) {
-                            if (kIsWeb) {
-                              // html.File file = html.File(result.files.single.bytes!, result.files.single.name);
-                              FormData formData = FormData.fromMap({
-                                'avatar': await MultipartFile.fromBytes(
-                                    result.files.single.bytes!,
-                                    filename: result.files.single.name)
-                              });
-
-                              await DioService()
-                                  .getApi(authBloc!.state)
-                                  .put('avatar/upload', data: formData)
-                                  .then((value) {
-                                final Map responseMap = value.data;
-                                print("UPLOAD");
-                                if (responseMap['success']) {
-                                  print("UPLOAD SUCCESS");
-                                  setState(() {
-                                    settingsData!.avatar = responseMap['data']
-                                        ['avatar']['generatedPath'];
-                                    //TODO: update avatar in auth bloc
-                                    // BlocProvider.of<AuthBloc>(context).add(
-                                    //     ChangeAvatarRequested(
-                                    //         settingsData!.avatar!));
-                                    state.changeAvatar(settingsData!.avatar!);
-                                  });
-                                }
-                              });
-                            }
-                          } else {
-                            // User canceled the picker
-                          }
-                        },
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
                 SwitchListTile(
                     value: settingsData!.twoFactorEnabled,
                     title: Text('Two Factor Authentication'),
@@ -129,6 +80,38 @@ class _SettingsPageState extends State<SettingsPage> {
                                       TwoFactorSettingsPage(isEnabled: !value)))
                           .then((value) => _loadSettings());
                     }),
+                ListTile(
+                  title: Text("Logout"),
+                  onTap: () {
+                    // Dialog
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text("Logout"),
+                            content: Text("Are you sure you want to logout?"),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, false);
+                                  },
+                                  child: Text("Cancel")),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, true);
+                                    // authBloc!.add(LogoutWithNav(context));
+                                  },
+                                  child: Text("Logout")),
+                            ],
+                          );
+                        }).then((value) {
+                      if (value == true) {
+                        authBloc!.add(SignOutRequested());
+                        Navigator.pop(context);
+                      }
+                    });
+                  },
+                )
               ],
             ),
     );

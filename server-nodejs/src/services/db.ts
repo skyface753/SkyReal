@@ -39,7 +39,7 @@ async function initDb() {
   const reals =
     'CREATE TABLE IF NOT EXISTS `reals` (`id` INT NOT NULL AUTO_INCREMENT , `userFk` INT NOT NULL , `frontPath` VARCHAR(250) NOT NULL, `backPath` VARCHAR(250) NOT NULL , `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, `timespan` BIGINT(20) NOT NULL , PRIMARY KEY (`id`), CONSTRAINT `reals_user` FOREIGN KEY (`userFk`) REFERENCES `user`(`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
   const friendships =
-    'create table if not exists `friendship` (user int(11), friend int(11),primary key(user, friend), key(friend, user), constraint `fk_user` foreign key (user) references user(id),constraint `fk_friend` foreign key (friend) references user(id));';
+    'create table if not exists `friendship` (user int(11), friend int(11),primary key(user, friend), `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, key(friend, user), constraint `fk_user` foreign key (user) references user(id),constraint `fk_friend` foreign key (friend) references user(id));';
   const roleResult = (await query(role, [])) as ResultSetHeader;
   const userResult = (await query(user, [])) as ResultSetHeader;
   const user2faResult = (await query(user_2fa, [])) as ResultSetHeader;
@@ -99,4 +99,34 @@ async function initDb() {
   Promise.all(promises).then(() => {
     console.log('SQL Tables created');
   });
+}
+
+import bycrypt from 'bcrypt';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function create1000TestUser() {
+  for (let i = 0; i < 1000; i++) {
+    const username = randomUsernameGenerator();
+    const email = username + '@example.de';
+    const password = 'test';
+    const hashedPassword = await bycrypt.hash(password, config.BCRYPT_ROUNDS);
+    const role = 1;
+    const user = await query(
+      'INSERT INTO `user` (`username`, `email`, `password`, `roleFk`) VALUES (?, ?, ?, ?)',
+      [username, email, hashedPassword, role]
+    );
+    console.log(user);
+  }
+}
+
+// create1000TestUser();
+
+function randomUsernameGenerator() {
+  let username = '';
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  const length = 10;
+  for (let i = 0; i < length; i++) {
+    username += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return username;
 }

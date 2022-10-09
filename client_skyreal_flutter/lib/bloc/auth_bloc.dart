@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:skyreal/data/repositories/auth_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meta/meta.dart';
+import 'package:skyreal/pages/login.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -18,7 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       try {
         await authRepository
             .signIn(
-                email: event.email,
+                username: event.username,
                 password: event.password,
                 totpCode: event.totpCode)
             .then((value) => {
@@ -70,11 +73,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
+    on<CancleOTP>((event, emit) async {
+      emit(UnAuthenticated());
+    });
+
     on<ChangeAvatarRequested>((event, emit) async {
       emit(Loading());
+
       try {
         await authRepository.changeAvatar(event.avatar);
         UserState? userState = await authRepository.isSignedIn();
+        // TODO: TEST BACKEND TOKEN
         if (userState != null) {
           emit(Authenticated(authenticatedUser: userState));
         } else {

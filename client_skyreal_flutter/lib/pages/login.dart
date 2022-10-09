@@ -16,14 +16,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController _emailController = TextEditingController();
+  TextEditingController _usernameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
   _login() {
     try {
       BlocProvider.of<AuthBloc>(context).add(
-        SignInRequested(_emailController.text, _passwordController.text),
+        SignInRequested(_usernameController.text, _passwordController.text),
       );
     } catch (e) {
       setState(() {
@@ -72,11 +72,12 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         TextField(
-                          controller: _emailController,
+                          controller: _usernameController,
                           autofocus: true,
                           decoration: const InputDecoration(
-                            labelText: 'Email',
+                            labelText: 'Username',
                           ),
+                          autofillHints: [AutofillHints.username],
                           onChanged: (value) => _btnController.reset(),
                         ),
                         TextField(
@@ -87,6 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                           decoration: const InputDecoration(
                             labelText: 'Password',
                           ),
+                          autofillHints: [AutofillHints.password],
                           onChanged: (value) => _btnController.reset(),
                           onSubmitted: (value) => _login(),
                         ),
@@ -126,22 +128,33 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     )));
           } else if (state is OTPRequired) {
-            return OtpTextField(
-              numberOfFields: 6,
-              borderColor: Color(0xFF512DA8),
-              //set to true to show as box or false to show as dash
-              showFieldAsBox: true,
-              //runs when a code is typed in
-              onCodeChanged: (String code) {
-                //handle validation or checks here
-              },
-              //runs when every textfield is filled
-              onSubmit: (String verificationCode) {
-                BlocProvider.of<AuthBloc>(context).add(SignInRequested(
-                    _emailController.text, _passwordController.text,
-                    totpCode: verificationCode));
-              }, // end onSubmit
-            );
+            return Center(
+                child: Column(children: [
+              Text("OTP Required"),
+              OtpTextField(
+                numberOfFields: 6,
+                borderColor: Color(0xFF512DA8),
+                //set to true to show as box or false to show as dash
+                showFieldAsBox: true,
+                //runs when a code is typed in
+                onCodeChanged: (String code) {
+                  //handle validation or checks here
+                },
+                //runs when every textfield is filled
+                onSubmit: (String verificationCode) {
+                  BlocProvider.of<AuthBloc>(context).add(SignInRequested(
+                      _usernameController.text, _passwordController.text,
+                      totpCode: verificationCode));
+                }, // end onSubmit
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                child: Text("Cancel"),
+                onPressed: () {
+                  BlocProvider.of<AuthBloc>(context).add(CancleOTP());
+                },
+              )
+            ]));
           }
           return Container();
         },

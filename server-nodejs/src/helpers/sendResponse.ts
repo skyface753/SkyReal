@@ -15,6 +15,8 @@ const sendResponse = {
 		});
 	},
 	error: (res: Response, message = 'Error') => {
+		console.trace();
+
 		res.status(400).json({
 			success: false,
 			message: message,

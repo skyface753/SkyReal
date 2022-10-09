@@ -5,6 +5,7 @@ import 'package:skyreal/bloc/auth_bloc.dart';
 import 'package:skyreal/components/appbar.dart';
 import 'package:skyreal/components/ownPicture.dart';
 import 'package:skyreal/components/showReal.dart';
+import 'package:skyreal/components/showTakeRealContainer.dart';
 import 'package:skyreal/pages/login.dart';
 import 'package:skyreal/pages/take_real.dart';
 import 'package:skyreal/services/dio_service.dart';
@@ -50,6 +51,46 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  bool userHasOwnReal = false;
+
+  Future<OwnReal?> _ownReal(AuthState authState) async {
+    Dio dioService = DioService().getApi(authState);
+    Response response = await dioService.get('reals/own');
+    /*{
+    "success": true,
+    "data": {
+        "real": {
+            "id": 25,
+            "userFk": 1,
+            "frontPath": "uploads/reals/uploadedImages-1665064972108.54.03.png",
+            "backPath": "uploads/reals/uploadedImages-1665064972112.56.05.png",
+            "createdAt": "2022-10-06T12:02:52.000Z",
+            "timespan": 11570
+        }
+    }
+}*/
+    // print(response.data);
+    if (response.data['success']) {
+      print(response.data['data']['real']);
+      if (response.data['data']['real'] != null) {
+        try {
+          OwnReal ownReal = OwnReal.fromJson(response.data['data']['real']);
+          userHasOwnReal = true;
+          return ownReal;
+        } catch (e) {
+          print(e);
+          return null;
+        }
+        return OwnReal.fromJson(response.data['data']['real']);
+      } else {
+        return null;
+      }
+      // return OwnReal.fromJson(response.data['data']['real']);
+    } else {
+      return null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -57,163 +98,107 @@ class _HomePageState extends State<HomePage> {
     _getReals();
   }
 
-  // Future<void> _loadData() async {
-  //   await dio.get('auth/status').then((value) {
-  //     final Map responseMap = value.data;
-  //     if (responseMap['success']) {
-  //       print(responseMap['data']);
-  //     }
-  //   });
-  // }
-  //TODO ADD Function
-  bool ownRealEmpty = true;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: 'SkyReal',
-      ),
-      extendBodyBehindAppBar: true,
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is Loading) {
-            // Showing the loading indicator while the user is signing in
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (state is Authenticated) {
-            return RefreshIndicator(
-                onRefresh: _getReals,
-                notificationPredicate: (notification) {
-                  // with NestedScrollView local(depth == 2) OverscrollNotification are not sent
-                  return notification.depth == 1;
-                },
-                displacement: 100,
-                // child: SafeArea(
-                child: NestedScrollView(
-                    headerSliverBuilder:
-                        (BuildContext context, bool innerBoxIsScrolled) {
-                      final headerMaxWidth = MediaQuery.of(context).size.width;
-
-                      return <Widget>[
-                        SliverPadding(
-                            padding: EdgeInsets.only(
-                                top: Size.fromHeight(kToolbarHeight).height +
-                                    50),
-                            sliver: SliverAppBar(
-                                stretch: true,
-                                backgroundColor: Colors.transparent,
-                                // expandedHeight: 200.0,
-                                floating: false,
-                                pinned: false,
-                                snap: false,
-                                flexibleSpace: FlexibleSpaceBar(
-                                    centerTitle: true,
-                                    stretchModes: [StretchMode.zoomBackground],
-                                    background: Container(
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: headerMaxWidth * 0.3),
-                                      child: Stack(
-                                          alignment: Alignment.topCenter,
-                                          children: [
-                                            CachedNetworkImage(
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                                httpHeaders: {
-                                                  'Authorization':
-                                                      'Bearer ${state.authenticatedUser.accessToken}'
-                                                },
-                                                errorWidget:
-                                                    (context, url, error) {
-                                                  ownRealEmpty = true;
-                                                  return Container(
-                                                      width: 100,
-                                                      height: 100,
-                                                      child: Center(
-                                                        child: ElevatedButton(
-                                                          onPressed: () {
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            TakePictureScreen()));
-                                                          },
-                                                          child:
-                                                              Text('Add Real'),
-                                                        ),
-                                                      ));
-                                                },
-                                                imageUrl: DioService.serverUrl +
-                                                    'reals/own/back' +
-                                                    '?t=' +
-                                                    DateTime.now()
-                                                        .millisecondsSinceEpoch
-                                                        .toString(),
-                                                fit: BoxFit.fill),
-                                            // Positioned(
-                                            //   top: 0,
-                                            //   left: 0,
-                                            //   child:
-
-                                            // child: Container(
-
-                                            Positioned(
-                                              left: 0,
-                                              top: 0,
-                                              child: Container(
-                                                height: 50,
-                                                width: 50,
-                                                child: CachedNetworkImage(
-                                                    httpHeaders: {
-                                                      'Authorization':
-                                                          'Bearer ${state.authenticatedUser.accessToken}'
-                                                    },
-                                                    imageUrl: DioService
-                                                            .serverUrl +
-                                                        'reals/own/front' +
-                                                        '?t=' +
-                                                        DateTime.now()
-                                                            .millisecondsSinceEpoch
-                                                            .toString(),
-                                                    errorWidget:
-                                                        (context, url, error) {
-                                                      ownRealEmpty = true;
-                                                      return Container();
-                                                    },
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            )
-                                            // ),
-                                          ]),
-                                    ))))
-                      ];
-                    },
-                    body: MediaQuery.removePadding(
-                        removeTop: true,
-                        context: context,
-                        child: ListView.builder(
-                          itemCount: reals.length,
-                          itemBuilder: (context, index) {
-                            final double itemWidth =
-                                MediaQuery.of(context).size.width;
-                            return ShowReal(
-                                real: reals[index],
-                                authState: state,
-                                itemWidth: itemWidth);
-                          },
-                        ))));
-          }
-
-          // print(state);
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is Loading) {
+          // Showing the loading indicator while the user is signing in
           return Center(
-            child: Text("Not Authenticated - ERROR"),
+            child: CircularProgressIndicator(),
           );
-        },
-      ),
+        }
+        if (state is Authenticated) {
+          return Scaffold(
+              appBar: CustomAppBar(
+                title: 'SkyReal',
+                authState: state,
+              ),
+              extendBodyBehindAppBar: true,
+              body: RefreshIndicator(
+                  onRefresh: _getReals,
+                  notificationPredicate: (notification) {
+                    // with NestedScrollView local(depth == 2) OverscrollNotification are not sent
+                    return notification.depth == 1;
+                  },
+                  displacement: 100,
+                  // child: SafeArea(
+                  child: NestedScrollView(
+                      headerSliverBuilder:
+                          (BuildContext context, bool innerBoxIsScrolled) {
+                        final headerMaxWidth =
+                            MediaQuery.of(context).size.width;
+
+                        return <Widget>[
+                          SliverPadding(
+                              padding: EdgeInsets.only(
+                                  top: Size.fromHeight(kToolbarHeight).height +
+                                      50),
+                              sliver: SliverAppBar(
+                                  stretch: true,
+                                  backgroundColor: Colors.transparent,
+                                  // expandedHeight: 200.0,
+                                  floating: false,
+                                  pinned: false,
+                                  snap: false,
+                                  flexibleSpace: FlexibleSpaceBar(
+                                      centerTitle: true,
+                                      stretchModes: [
+                                        StretchMode.zoomBackground
+                                      ],
+                                      background: FutureBuilder(
+                                        future: _ownReal(state),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.hasData) {
+                                            print("has data");
+                                            return OwnPicture(
+                                                snapshot.data!.backPath,
+                                                snapshot.data!.frontPath,
+                                                headerMaxWidth,
+                                                state.authenticatedUser
+                                                    .accessToken);
+                                          } else {
+                                            return TakeRealButton();
+                                          }
+                                        },
+                                      ))))
+                        ];
+                      },
+                      body: MediaQuery.removePadding(
+                          removeTop: true,
+                          context: context,
+                          child: ListView.builder(
+                            itemCount: reals.length,
+                            itemBuilder: (context, index) {
+                              final double itemWidth =
+                                  MediaQuery.of(context).size.width;
+                              return ShowReal(
+                                  real: reals[index],
+                                  authState: state,
+                                  itemWidth: itemWidth,
+                                  userhasOwnReal: userHasOwnReal);
+                            },
+                          )))));
+        }
+        if (state is UnAuthenticated) {
+          Future.microtask(() => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+              (route) => false));
+        }
+        return Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                  context, MaterialPageRoute(builder: (context) => LoginPage()),
+                  (r) {
+                return false;
+              });
+            },
+            child: Text('Login'),
+          ),
+        );
+      },
     );
   }
 }

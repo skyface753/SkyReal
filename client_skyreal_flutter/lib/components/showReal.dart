@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
@@ -9,11 +11,13 @@ class ShowReal extends StatefulWidget {
   Real real;
   Authenticated authState;
   double itemWidth;
+  bool userhasOwnReal;
   ShowReal(
       {Key? key,
       required this.real,
       required this.authState,
-      required this.itemWidth})
+      required this.itemWidth,
+      required this.userhasOwnReal})
       : super(key: key);
 
   @override
@@ -52,86 +56,148 @@ class _ShowRealState extends State<ShowReal> {
                               Text(widget.real.createdAt)
                             ]))
                   ]))),
-          Stack(
-            children: [
-              GestureDetector(
-                onLongPress: () {
-                  setState(() {
-                    backgroundImageHolded = true;
-                  });
-                },
-                onLongPressUp: () {
-                  setState(() {
-                    backgroundImageHolded = false;
-                  });
-                },
-                child: CachedNetworkImage(
-                  httpHeaders: {
-                    'Authorization':
-                        'Bearer ${widget.authState.authenticatedUser.accessToken}'
-                  },
-                  //TODO Remove dyn time to enable caching
-                  imageUrl: DioService.serverUrl + widget.real.backPath,
-                  imageBuilder: (context, imageProvider) => Container(
-                    // width: itemWidth,
-                    // height: 300,
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image(
-                        image: imageProvider,
+          !widget.userhasOwnReal
+              ?
+              // ? Container(
+              //     decoration: new BoxDecoration(
+              //       image: new DecorationImage(
+              //         image: new NetworkImage(
+              //             DioService.serverUrl +
+              //                 widget.real.backPath +
+              //                 '?t=' +
+              //                 DateTime.now().millisecondsSinceEpoch.toString(),
+              //             headers: {
+              //               'Authorization':
+              //                   'Bearer ${widget.authState.authenticatedUser.accessToken}'
+              //             }),
+              //         fit: BoxFit.cover,
+              //       ),
+              //     ),
+              //     child: new BackdropFilter(
+              //       filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+              //       child: new Container(
+              //         decoration: new BoxDecoration(
+              //             color: Colors.white.withOpacity(0.0)),
+              //       ),
+              //     ),
+              //   )
+              SizedBox(
+                  height: 200,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        DioService.serverUrl +
+                            widget.real.backPath +
+                            '?t=' +
+                            DateTime.now().millisecondsSinceEpoch.toString(),
+                        headers: {
+                          'Authorization':
+                              'Bearer ${widget.authState.authenticatedUser.accessToken}'
+                        },
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey,
+                          );
+                        },
+                      ),
+                      ClipRRect(
+                        // Clip it cleanly.
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            color: Colors.grey.withOpacity(0.1),
+                            alignment: Alignment.center,
+                            child: Text('CHOCOLATE'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Stack(
+                  children: [
+                    GestureDetector(
+                      onLongPress: () {
+                        setState(() {
+                          backgroundImageHolded = true;
+                        });
+                      },
+                      onLongPressUp: () {
+                        setState(() {
+                          backgroundImageHolded = false;
+                        });
+                      },
+                      child: CachedNetworkImage(
+                        httpHeaders: {
+                          'Authorization':
+                              'Bearer ${widget.authState.authenticatedUser.accessToken}'
+                        },
+                        //TODO Remove dyn time to enable caching
+                        imageUrl: DioService.serverUrl + widget.real.backPath,
+                        imageBuilder: (context, imageProvider) => Container(
+                          // width: itemWidth,
+                          // height: 300,
+                          decoration: BoxDecoration(
+                            border: Border.all(width: 1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image(
+                              image: imageProvider,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) =>
+                                CircularProgressIndicator(
+                                    value: downloadProgress.progress),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
                       ),
                     ),
-                  ),
-                  progressIndicatorBuilder: (context, url, downloadProgress) =>
-                      CircularProgressIndicator(
-                          value: downloadProgress.progress),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
+                    !backgroundImageHolded
+                        ? SizedBox(
+                            height: widget.itemWidth * 0.3,
+                            width: widget.itemWidth * 0.3,
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                child: CachedNetworkImage(
+                                    httpHeaders: {
+                                      'Authorization':
+                                          'Bearer ${widget.authState.authenticatedUser.accessToken}'
+                                    },
+                                    imageUrl: DioService.serverUrl +
+                                        widget.real.frontPath +
+                                        '?t=' +
+                                        onErrorCounter.toString(),
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(width: 5),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                    placeholder: (context, url) =>
+                                        CircularProgressIndicator(),
+                                    errorWidget: (context, url, error) {
+                                      onErrorCounter++;
+                                      return Icon(Icons.error);
+                                    }),
+                              ),
+                            ))
+                        : Container()
+                  ],
                 ),
-              ),
-              !backgroundImageHolded
-                  ? SizedBox(
-                      height: widget.itemWidth * 0.3,
-                      width: widget.itemWidth * 0.3,
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                          child: CachedNetworkImage(
-                              httpHeaders: {
-                                'Authorization':
-                                    'Bearer ${widget.authState.authenticatedUser.accessToken}'
-                              },
-                              imageUrl: DioService.serverUrl +
-                                  widget.real.frontPath +
-                                  '?t=' +
-                                  onErrorCounter.toString(),
-                              imageBuilder: (context, imageProvider) =>
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(width: 5),
-                                      borderRadius: BorderRadius.circular(20),
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                              placeholder: (context, url) =>
-                                  CircularProgressIndicator(),
-                              errorWidget: (context, url, error) {
-                                onErrorCounter++;
-                                return Icon(Icons.error);
-                              }),
-                        ),
-                      ))
-                  : Container()
-            ],
-          ),
         ]));
   }
 }

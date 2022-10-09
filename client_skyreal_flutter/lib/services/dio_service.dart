@@ -1,5 +1,6 @@
 // import 'package:dio/adapter_browser.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:skyreal/bloc/auth_bloc.dart';
 
@@ -63,7 +64,7 @@ class DioService {
       if (error.response?.statusCode == 401 &&
           errorData['message'] == 'jwt expired') {
         print("REFRESH ACCESS TOKEN");
-        if (!await refreshToken(dio, authState)) {
+        if (!await _refreshToken(dio, authState)) {
           print("REFRESH TOKEN FAILED");
           return handler.next(error);
         }
@@ -92,11 +93,13 @@ class DioService {
     return dio;
   }
 
-  Future<bool> refreshToken(Dio dio, AuthState authState) async {
+  Future<bool> _refreshToken(Dio dio, AuthState authState,
+      {int retryCount = 1}) async {
     final storage = new FlutterSecureStorage();
     String? refreshToken = await storage.read(key: 'refreshToken');
     if (refreshToken == null) {
       print("REFRESH TOKEN NOT FOUND");
+
       return false;
     }
     Response refreshResponse = await dio
@@ -117,6 +120,9 @@ class DioService {
       return true;
     }
     print("REFRESH TOKEN FAILED");
+    if (retryCount < 3) {
+      return _refreshToken(dio, authState, retryCount: retryCount + 1);
+    }
     return false;
   }
 

@@ -23,6 +23,7 @@ notification_body = {
     'included_segments': ['Subscribed Users'],
 }
 
+
 redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
 # Randrom Timestamp between tomorrow 10am and 12:59:59pm

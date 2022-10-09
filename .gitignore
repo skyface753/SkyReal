@@ -3,4 +3,5 @@ data/db
 server-nodejs/files/avatars/**
 server-nodejs/src/config.json
 master-python/.env
-master-python/.env
+server-nodejs/uploads/reals/**
+server-nodejs/src/config.json

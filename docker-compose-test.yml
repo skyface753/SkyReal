@@ -1,0 +1,58 @@
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: skyrealdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./data/db:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      PMA_HOST: db
+    ports:
+      - 8084:80
+    restart: always
+
+  redis:
+    image: bitnami/redis:latest
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  master:
+    build:
+      context: ./master-python
+      dockerfile: Dockerfile
+    ports:
+      - 5010:80
+    depends_on:
+      - redis
+      - db
+
+  backend:
+    build:
+      context: ./server-nodejs
+      dockerfile: Dockerfile
+    expose:
+      - 5000
+    depends_on:
+      - redis
+      - db
+      - master
+
+  loadproxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - 5000:80
+    depends_on:
+      - backend
