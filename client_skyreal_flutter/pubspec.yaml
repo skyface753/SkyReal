@@ -49,6 +49,7 @@ dependencies:
   camera:
   path_provider:
   path:
+  flutter_hooks: ^0.18.5+1
 dev_dependencies:
   flutter_test:
     sdk: flutter

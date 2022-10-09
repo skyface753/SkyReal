@@ -18,18 +18,29 @@ class OwnPicture extends StatelessWidget {
     return Container(
         margin: EdgeInsets.symmetric(horizontal: headerMaxWidth * 0.3),
         child: Stack(alignment: Alignment.topCenter, children: [
-          CachedNetworkImage(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.5,
-              httpHeaders: {'Authorization': 'Bearer $accessToken'},
-              errorWidget: (context, url, error) {
-                return TakeRealButton();
-              },
-              imageUrl: DioService.serverUrl +
-                  backPath +
-                  '?t=' +
-                  DateTime.now().millisecondsSinceEpoch.toString(),
-              fit: BoxFit.fill),
+          FittedBox(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(40.0),
+              child: CachedNetworkImage(
+                  placeholder: (context, url) {
+                    return Center(
+                        child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).primaryColor)));
+                  },
+                  // width: MediaQuery.of(context).size.width,
+                  // height: MediaQuery.of(context).size.height * 0.5,
+                  httpHeaders: {'Authorization': 'Bearer $accessToken'},
+                  errorWidget: (context, url, error) {
+                    return TakeRealButton();
+                  },
+                  imageUrl: DioService.serverUrl +
+                      backPath +
+                      '?t=' +
+                      DateTime.now().millisecondsSinceEpoch.toString(),
+                  fit: BoxFit.fill),
+            ),
+          ),
           // Positioned(
           //   top: 0,
           //   left: 0,
