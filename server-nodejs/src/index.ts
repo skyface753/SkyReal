@@ -38,33 +38,32 @@ app.disable('x-powered-by');
 // CORS TODO: Change for Production
 // app.use(cors()); // Development
 app.use(
-	// Production
-	cors({
-		origin: [
-			'http://localhost:3000', // React
-			'http://localhost:3001', // Flutter
-			// "http://localhost:19006",
-		],
-		credentials: true,
-	})
+  // Production
+  cors({
+    origin: [
+      'http://localhost:3000', // React
+      'http://localhost:3001', // Flutter
+      // "http://localhost:19006",
+    ],
+    credentials: true,
+  })
 );
 
 // Helmet
 app.use(
-	helmet({
-		// crossOriginResourcePolicy: true,
-		crossOriginResourcePolicy:
-			process.env.NODE_ENV !== 'development',
-	})
+  helmet({
+    // crossOriginResourcePolicy: true,
+    crossOriginResourcePolicy: process.env.NODE_ENV !== 'development',
+  })
 );
 
 // set up rate limiter to prevent brute force attacks
 const limiter = RateLimit({
-	windowMs: 1 * 60 * 1000, // 1 minute
-	max: 400000, // TODO: Change for Production
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 400000, // TODO: Change for Production
 });
 app.use(limiter); //  apply to all requests
-
+console.log(process.env.MYSQL_HOST);
 // Body Parser
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -87,7 +86,7 @@ app.use(compression());
 //   })
 // );
 if (process.env.NODE_ENV !== 'development') {
-	app.use(morgan('combined'));
+  app.use(morgan('combined'));
 }
 
 // Routes
@@ -97,9 +96,9 @@ app.use('/api/', routes);
 
 // Start Server
 if (process.env.MODE !== 'Test') {
-	app.listen(port, () => {
-		console.log(`Server running on port ${port}`);
-	});
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
 }
 
 export default app;

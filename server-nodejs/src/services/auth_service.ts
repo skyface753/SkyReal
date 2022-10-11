@@ -15,9 +15,10 @@ import middleware from '../middleware';
 import { Request, Response } from 'express';
 import { IUserFromCookieInRequest } from '../types/express-custom';
 import { IAccessTokenPayload } from '../types/jwt-payload';
+import { redisConfig } from './redisConfig';
 
 const redisClient = redis.createClient({
-  url: ('redis://' + config.REDIS.host + ':' + config.REDIS.port).toString(),
+  url: 'redis://' + redisConfig.host + ':' + redisConfig.port,
   //   legacyMode: true,
 });
 
@@ -372,7 +373,7 @@ const AuthService = {
         return;
       }
       // console.log(user);
-      const { id, username, email, roleFk, generatedPath } = user[0];
+      const { id, username, email, roleFk } = user[0];
       sendResponse.success(res, {
         id,
         username,

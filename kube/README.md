@@ -1,0 +1,9 @@
+- `kompose convert -f docker-compose.yaml` -> Creates the Kuberneted files
+  - Use the minikube docker registry to push the images to the minikube registry -> `eval $(minikube -p minikube docker-env)`
+  - Backend and Master needs to be builded -> "server-nodejs" -> `docker build -t skyface753/skyreal-backend .`
+  - backend-deployment.yaml -> `imagePullPolicy: Never` (under image) -> to avoid pulling the image from docker hub
+- `kubectl apply -f .` -> Creates the pods, services, deployments, etc.
+- `kubectl get pods` -> Shows the pods
+- `minikube service backend` -> Opens the service in the browser
+- `miniube service pypmyadmin` -> Opens the service in the browser
+- `kubectl delete -f .` -> Deletes the pods, services, deployments, etc.

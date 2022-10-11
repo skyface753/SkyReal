@@ -5,3 +5,4 @@ server-nodejs/src/config.json
 master-python/.env
 server-nodejs/uploads/reals/**
 server-nodejs/src/config.json
+develop

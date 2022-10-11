@@ -1,0 +1,68 @@
+version: '2'
+
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: prodroot
+      MYSQL_DATABASE: skyrealdbprod
+      MYSQL_USER: userprod
+      MYSQL_PASSWORD: passwordprod
+    ports:
+      - '3306'
+    volumes:
+      - db-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      PMA_HOST: db
+    ports:
+      - 8084:80
+    restart: always
+
+  redis:
+    image: bitnami/redis:latest
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  master:
+    build:
+      context: ../master-python
+      dockerfile: Dockerfile
+    ports:
+      - 5010:80
+    depends_on:
+      - redis
+      - db
+
+  backend:
+    image: skyface753/skyreal-backend:latest
+    ports:
+      - '5000:5000'
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MYSQL_HOST=db
+      - MYSQL_USER=userprod
+      - MYSQL_PASSWORD=passwordprod
+      - MYSQL_DATABASE=skyrealdbprod
+    depends_on:
+      - redis
+      - db
+      - master
+
+  # loadproxy:
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 5000:80
+  #   depends_on:
+  #     - backend
+
+volumes:
+  db-data:

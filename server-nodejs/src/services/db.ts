@@ -1,5 +1,14 @@
 import mysql, { ResultSetHeader } from 'mysql2/promise';
 import config from '../config.json';
+import bycrypt from 'bcrypt';
+
+const configDb = {
+  host: process.env.MYSQL_HOST || 'localhost',
+  user: process.env.MYSQL_USER || 'user',
+  password: process.env.MYSQL_PASSWORD || 'password',
+  database: process.env.MYSQL_DATABASE || 'skyrealdb',
+  port: parseInt(process.env.MYSQL_PORT || '3306'),
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function query(sql: string, params: any[]) {
@@ -7,9 +16,10 @@ async function query(sql: string, params: any[]) {
     if (process.env.SQLDEBUG == 'true') {
       console.log('SQL Query: ' + sql);
       console.log('SQL Params: ' + JSON.stringify(params));
-      console.log('DB CONFIG: ' + JSON.stringify(config.SQLDB));
+      console.log('DB CONFIG: ' + JSON.stringify(configDb));
     }
-    const connection = await mysql.createConnection(config.SQLDB);
+    console.log(configDb);
+    const connection = await mysql.createConnection(configDb);
     const [results] = await connection.execute(sql, params);
     connection.end();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,8 +110,6 @@ async function initDb() {
     console.log('SQL Tables created');
   });
 }
-
-import bycrypt from 'bcrypt';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function create1000TestUser() {
