@@ -32,8 +32,6 @@ class _ShowRealState extends State<ShowReal> {
   bool showFrontImage = true;
   bool frontImageHolded = false;
 
-  Offset positionFrontImage = Offset(20, 20);
-
   int onErrorCounter =
       0; // Incremented when an error occurs -> Refreshes the image
 
@@ -64,30 +62,11 @@ class _ShowRealState extends State<ShowReal> {
                   ]))),
           !widget.userhasOwnReal
               ? blurredImageWithButton()
-              : DragArea(
+              : ShowRealDragArea(
                   child: frontImageWidget(),
                   backImageChild: backImageWidget(),
                   itemWidth: widget.itemWidth,
                   showFrontImage: showFrontImage)
-          // : Stack(
-          //     children: [
-          //       GestureDetector(
-          //         onLongPress: () {
-          //           setState(() {
-          //             backgroundImageHolded = true;
-          //           });
-          //         },
-          //         onLongPressUp: () {
-          //           setState(() {
-          //             backgroundImageHolded = false;
-          //           });
-          //         },
-          //         child:
-
-          //       ),
-          //       !backgroundImageHolded ? positionedPicture() : Container()
-          //     ],
-          //   ),
         ]));
   }
 
@@ -207,39 +186,15 @@ class _ShowRealState extends State<ShowReal> {
                   return Icon(Icons.error);
                 })));
   }
-
-  // Widget positionedPicture() {
-  //   return SizedBox(
-  //       height: widget.itemWidth * 0.3,
-  //       width: widget.itemWidth * 0.3,
-  //       // child: Align(
-  //       //     alignment: Alignment.topLeft,
-  //       child: Positioned(
-  //           top: 10,
-  //           left: 10,
-  //           child: Padding(
-  //             padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
-  //             child: GestureDetector(
-  //               onTap: () {
-  //                 String tempBackPath = widget.real.backPath;
-  //                 setState(() {
-  //                   widget.real.backPath = widget.real.frontPath;
-  //                   widget.real.frontPath = tempBackPath;
-  //                 });
-  //               },
-  //               child:
-  //             )
-  //           )));
-  // }
 }
 
-class DragArea extends HookWidget {
+class ShowRealDragArea extends HookWidget {
   final Widget child;
   final Widget backImageChild;
   final double itemWidth;
   final bool showFrontImage;
 
-  const DragArea(
+  const ShowRealDragArea(
       {Key? key,
       required this.child,
       required this.backImageChild,

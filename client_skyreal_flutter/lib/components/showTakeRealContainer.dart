@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skyreal/pages/display_taken_picture.dart';
 import 'package:skyreal/pages/take_real.dart';
 
 class TakeRealButton extends StatelessWidget {
@@ -14,6 +15,16 @@ class TakeRealButton extends StatelessWidget {
             onPressed: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => TakePictureScreen()));
+            },
+            onLongPress: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DisplayPictureScreen(
+                            backImagePath: 'assets/images/simulator-1.png',
+                            frontImagePath: 'assets/images/simulator-2.png',
+                            simulator: true,
+                          )));
             },
             child: Text('Post your Real'),
           ),

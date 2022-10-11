@@ -18,7 +18,7 @@ async function query(sql: string, params: any[]) {
       console.log('SQL Params: ' + JSON.stringify(params));
       console.log('DB CONFIG: ' + JSON.stringify(configDb));
     }
-    console.log(configDb);
+    // console.log(configDb);
     const connection = await mysql.createConnection(configDb);
     const [results] = await connection.execute(sql, params);
     connection.end();

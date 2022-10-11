@@ -3,8 +3,12 @@ import 'package:flutter_profile_picture/flutter_profile_picture.dart';
 import 'package:skyreal/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skyreal/components/friendspage/aUserListTile.dart';
 import 'package:skyreal/services/dio_service.dart';
+import 'package:skyreal/views/friends/friendslist.dart';
 import 'dart:math' as math;
+
+import 'package:skyreal/views/friends/search.dart';
 
 class FriendsPage extends StatefulWidget {
   @override
@@ -47,9 +51,7 @@ class _FriendsPageState extends State<FriendsPage> {
     super.initState();
   }
 
-  List<SearchUser> searchUsers = [];
-
-  TextEditingController _searchController = TextEditingController();
+  int index = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -80,147 +82,18 @@ class _FriendsPageState extends State<FriendsPage> {
           }
           if (state is Authenticated) {
             Dio dioService = DioService().getApi(state);
-            return RefreshIndicator(
-                onRefresh: () async {
-                  // await DioService().getApi().get('auth/status').then((value) {
-                  //   final Map responseMap = value.data;
-                  //   if (responseMap['success']) {
-                  //     print(responseMap['data']);
-                  //   }
-                  // });
-                },
-                child: SafeArea(
-                    child: NestedScrollView(
-                        headerSliverBuilder:
-                            (BuildContext context, bool innerBoxIsScrolled) {
-                          final headerMaxWidth =
-                              MediaQuery.of(context).size.width;
-
-                          return <Widget>[
-                            SliverAppBar(
-                              stretch: true,
-                              backgroundColor: Colors.transparent,
-                              expandedHeight: 100,
-                              automaticallyImplyLeading: false,
-                              floating: true,
-                              pinned: false,
-                              snap: true,
-                              flexibleSpace: FlexibleSpaceBar(
-                                  centerTitle: true,
-                                  stretchModes: [StretchMode.zoomBackground],
-                                  background: Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Row(children: [
-                                        Expanded(
-                                            child: TextField(
-                                          controller: _searchController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Search',
-                                            prefixIcon: Icon(Icons.search),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                          ),
-                                        )),
-                                        SizedBox(width: 20),
-                                        ElevatedButton(
-                                            child: Text("Search"),
-                                            onPressed: () async {
-                                              Dio dioService =
-                                                  DioService().getApi(state);
-                                              try {
-                                                var response = await dioService
-                                                    .get(
-                                                        'search/user?query=${_searchController.text}')
-                                                    .catchError((error) {
-                                                  print(error);
-                                                  searchUsers = [];
-                                                  setState(() {});
-                                                });
-
-                                                searchUsers.clear();
-                                                /*{
-    "success": true,
-    "data": []
-}*/
-                                                if (response.data['success']) {
-                                                  if (response.data['data'] !=
-                                                      null) {
-                                                    for (var user in response
-                                                        .data['data']) {
-                                                      searchUsers.add(
-                                                          SearchUser.fromJson(
-                                                              user));
-                                                    }
-                                                    setState(() {});
-                                                    return;
-                                                  }
-                                                  searchUsers = [];
-                                                  setState(() {});
-                                                }
-                                              } catch (e) {
-                                                print(e);
-                                              }
-                                            }),
-                                      ]))),
-                            ),
-                          ];
-                        },
-                        body: searchUsers.length > 0
-                            ? ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: searchUsers.length,
-                                itemBuilder: (context, index) {
-                                  return SizedBox(
-                                      // height: 100,
-                                      child: ListTile(
-                                          leading: ProfilePicture(
-                                            name: searchUsers[index].username,
-                                            radius: 25,
-                                            fontsize: 17,
-                                          ),
-                                          title:
-                                              Text(searchUsers[index].username),
-                                          trailing: _buildSearchUserButton(
-                                              dioService, searchUsers[index])
-                                          // ElevatedButton(
-                                          //     child: Text("Add"),
-                                          //     onPressed: () async {
-                                          //       Dio dioService =
-                                          //           DioService().getApi(state);
-                                          //       await dioService
-                                          //           .post('friends/add', data: {
-                                          //         'recipient':
-                                          //             searchUsers[index].id
-                                          //       }).then((response) {
-                                          //         if (response.data['success']) {
-                                          //           print(response.data['data']);
-                                          //           // Show toast
-                                          //           ScaffoldMessenger.of(context)
-                                          //               .showSnackBar(SnackBar(
-                                          //             content: Text(
-                                          //                 response.data['data']),
-                                          //             duration:
-                                          //                 Duration(seconds: 3),
-                                          //           ));
-                                          //         } else {
-                                          //           // Show toast
-                                          //           ScaffoldMessenger.of(context)
-                                          //               .showSnackBar(SnackBar(
-                                          //             content: Text(response
-                                          //                 .data['message']),
-                                          //             duration:
-                                          //                 Duration(seconds: 3),
-                                          //           ));
-                                          //         }
-                                          //       });
-                                          //     }),
-                                          ));
-                                })
-                            : Container())));
+            return SafeArea(
+                child: Stack(
+              children: [
+                _stackedContainers(dioService, state),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: _navigationButtons(),
+                ),
+              ],
+            ));
           }
-          return Center(
+          return const Center(
             child: Text('Something went wrong'),
           );
         },
@@ -228,121 +101,68 @@ class _FriendsPageState extends State<FriendsPage> {
     );
   }
 
-  ElevatedButton _buildSearchUserButton(Dio dioService, SearchUser searchUser) {
-    Text buttonText;
-    switch (searchUser.status) {
-      case FriendStatus.none:
-        buttonText = Text("Add");
-        break;
-      case FriendStatus.pendingIncoming:
-        buttonText = Text("Accept");
-        break;
-      case FriendStatus.pendingOutgoing:
-        buttonText = Text("Cancel");
-        break;
-      case FriendStatus.friends:
-        buttonText = Text("Friends");
-        break;
-    }
-    return ElevatedButton(
-        child: buttonText,
-        onPressed: () async {
-          if (searchUser.status == FriendStatus.none ||
-              searchUser.status == FriendStatus.pendingIncoming) {
-            if (searchUser.status == FriendStatus.none) {
-              setState(() {
-                searchUser.status = FriendStatus.pendingOutgoing;
-              });
-            } else if (searchUser.status == FriendStatus.pendingIncoming) {
-              setState(() {
-                searchUser.status = FriendStatus.friends;
-              });
-            }
-            await dioService.post('friends/add',
-                data: {'recipient': searchUser.id}).then((response) {
-              if (response.data['success']) {
-                print(response.data['data']);
-                // Show toast
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(response.data['data']),
-                  duration: Duration(seconds: 3),
-                ));
-              } else {
-                // Show toast
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(response.data['message']),
-                  duration: Duration(seconds: 3),
-                ));
-              }
-            });
-          } else if (searchUser.status == FriendStatus.pendingOutgoing) {
-            setState(() {
-              searchUser.status = FriendStatus.none;
-            });
-            await dioService.post('friends/remove',
-                data: {'recipient': searchUser.id}).then((response) {
-              if (response.data['success']) {
-                print(response.data['data']);
-                // Show toast
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(response.data['data']),
-                  duration: Duration(seconds: 3),
-                ));
-              } else {
-                // Show toast
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(response.data['message']),
-                  duration: Duration(seconds: 3),
-                ));
-              }
-            });
-          } else if (searchUser.status == FriendStatus.friends) {
-            // Show Dialog
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("Remove Friend"),
-                    content: Text(
-                        "Are you sure you want to remove ${searchUser.username} from your friends list?"),
-                    actions: [
-                      TextButton(
-                          onPressed: () async {
-                            setState(() {
-                              searchUser.status = FriendStatus.none;
-                            });
-                            await dioService.post('friends/remove', data: {
-                              'recipient': searchUser.id
-                            }).then((response) {
-                              if (response.data['success']) {
-                                print(response.data['data']);
-                                // Show toast
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text(response.data['data']),
-                                  duration: Duration(seconds: 3),
-                                ));
-                              } else {
-                                // Show toast
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text(response.data['message']),
-                                  duration: Duration(seconds: 3),
-                                ));
-                              }
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("Yes")),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("No"))
-                    ],
-                  );
+  Widget _navigationButtons() {
+    return
+        // Oval Container with 3 Buttons
+        Container(
+      height: 60,
+      width: 300,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: Offset(0, 3), // changes position of shadow
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Requests Button
+          IconButton(
+              icon: Icon(Icons.person_add),
+              color: index == 0 ? Colors.blue : Colors.grey,
+              onPressed: () {
+                setState(() {
+                  index = 0;
                 });
-          }
-        });
+              }),
+          // Search Button
+          IconButton(
+              icon: Icon(Icons.search),
+              color: index == 1 ? Colors.blue : Colors.grey,
+              onPressed: () {
+                setState(() {
+                  index = 1;
+                });
+              }),
+          // Friends Button
+
+          IconButton(
+              icon: Icon(Icons.people),
+              color: index == 2 ? Colors.blue : Colors.grey,
+              onPressed: () {
+                setState(() {
+                  index = 2;
+                });
+              }),
+        ],
+      ),
+    );
+  }
+
+  Widget _stackedContainers(Dio dioService, AuthState authState) {
+    return IndexedStack(
+      index: index,
+      children: <Widget>[
+        Container(),
+        FriendsSearchView(dioService: dioService, authState: authState),
+        FriendsListView(dioService: dioService)
+      ],
+    );
   }
 }

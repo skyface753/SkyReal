@@ -5,4 +5,10 @@ import Middleware from '../middleware';
 
 router.post('/add', Middleware.authUser, FriendsService.add);
 router.post('/remove', Middleware.authUser, FriendsService.remove);
+router.get(
+  '/incoming',
+  Middleware.authUser,
+  FriendsService.getIncomingFriendRequests
+);
+router.get('/all', Middleware.authUser, FriendsService.getAll);
 export default router;

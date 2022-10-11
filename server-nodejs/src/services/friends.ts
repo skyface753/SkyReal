@@ -4,6 +4,7 @@ import sendResponse from '../helpers/sendResponse';
 import { IUserFromCookieInRequest } from '../types/express-custom';
 import * as OneSignal from '@onesignal/node-onesignal';
 import config from '../config.json';
+import { FriendStatus, UserResponse } from './search';
 const ONESIGNAL_APP_ID = config.OneSignal.appID;
 
 const app_key_provider = {
@@ -135,6 +136,44 @@ const FriendsService = {
       id,
     ]);
     return sendResponse.success(res, 'Friend removed');
+  },
+
+  getIncomingFriendRequests: async (
+    req: IUserFromCookieInRequest,
+    res: Response
+  ) => {
+    if (!req.user) {
+      return sendResponse.authError(res);
+    }
+    const result = await db.query(
+      'SELECT user.id, user.username FROM friendship INNER JOIN user ON friendship.user = user.id WHERE friendship.friend = ? AND friendship.status = "pending"',
+      [req.user.id]
+    );
+    if (!result || !result.length) {
+      return sendResponse.success(res, 'No friend requests');
+    }
+    const userResponse: UserResponse[] = result.map((user: UserResponse) => ({
+      ...user,
+      friendship: FriendStatus.PENDINGIN,
+    }));
+    return sendResponse.success(res, userResponse);
+  },
+  getAll: async (req: IUserFromCookieInRequest, res: Response) => {
+    if (!req.user) {
+      return sendResponse.authError(res);
+    }
+    const { id } = req.user;
+    const friends = await db.query(
+      'SELECT user.id, user.username FROM friendship JOIN user ON user.id = friendship.friend WHERE friendship.user = ?',
+      [id]
+    );
+    const friendsResponse: UserResponse[] = friends.map(
+      (user: UserResponse) => ({
+        ...user,
+        friendship: FriendStatus.FRIENDS,
+      })
+    );
+    return sendResponse.success(res, friendsResponse);
   },
 };
 

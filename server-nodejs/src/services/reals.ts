@@ -89,6 +89,9 @@ const RealsService = {
       return friendship.friend;
     });
     console.log('Friend IDs', friendIds);
+    if (friendIds.length === 0) {
+      return sendResponse.success(res, []);
+    }
     const lastRealTimestamp = await getLastRealTimestamp();
     if (!lastRealTimestamp) {
       return sendResponse.success(res, {
