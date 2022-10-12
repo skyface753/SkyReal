@@ -6,7 +6,7 @@ import Middleware from '../middleware';
 router.post('/add', Middleware.authUser, FriendsService.add);
 router.post('/remove', Middleware.authUser, FriendsService.remove);
 router.get(
-  '/incoming',
+  '/requests',
   Middleware.authUser,
   FriendsService.getIncomingFriendRequests
 );

@@ -58,7 +58,44 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text('Settings'),
       ),
       body: settingsData == null
-          ? Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Column(
+              children: [
+                CircularProgressIndicator(),
+                ListTile(
+                  title: Text("Logout"),
+                  onTap: () {
+                    // Dialog
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text("Logout"),
+                            content: Text("Are you sure you want to logout?"),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, false);
+                                  },
+                                  child: Text("Cancel")),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, true);
+                                    // authBloc!.add(LogoutWithNav(context));
+                                  },
+                                  child: Text("Logout")),
+                            ],
+                          );
+                        }).then((value) {
+                      if (value == true) {
+                        authBloc!.add(SignOutRequested());
+                        Navigator.pop(context);
+                      }
+                    });
+                  },
+                )
+              ],
+            ))
           : ListView(
               children: [
                 ListTile(

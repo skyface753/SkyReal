@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skyreal/components/friendspage/aUserListTile.dart';
 import 'package:skyreal/services/dio_service.dart';
 import 'package:skyreal/views/friends/friendslist.dart';
+import 'package:skyreal/views/friends/requests.dart';
 import 'dart:math' as math;
 
 import 'package:skyreal/views/friends/search.dart';
@@ -159,7 +160,9 @@ class _FriendsPageState extends State<FriendsPage> {
     return IndexedStack(
       index: index,
       children: <Widget>[
-        Container(),
+        FriendRequestsList(
+          dioService: dioService,
+        ),
         FriendsSearchView(dioService: dioService, authState: authState),
         FriendsListView(dioService: dioService)
       ],
