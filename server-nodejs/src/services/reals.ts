@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { NextFunction, Response } from 'express';
 import sendResponse from '../helpers/sendResponse';
 import { IUserFromCookieInRequest } from '../types/express-custom';
 import db from './db';
@@ -244,6 +244,35 @@ const RealsService = {
       });
     }
   },
+  checkIfUserMayAccessReal: async (
+    req: IUserFromCookieInRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const reqUser = req.user;
+    const path = 'uploads/reals' + req.path; // Path is unique in db
+    console.log(path);
+    const real = await db.query(
+      'SELECT * FROM reals WHERE frontPath = ? OR backPath = ?',
+      [path, path]
+    );
+    if (real.length === 0 || !real[0]) {
+      return sendResponse.error(res, 'Real not found');
+    }
+    if (req.user?.id === real[0].userFk) {
+      console.log('Is owner');
+      return next();
+    }
+    const friendshipFromAndToUser = await db.query(
+      'SELECT f1.* FROM friendship f1 INNER JOIN friendship f2 ON f1.user = f2.friend AND f1.friend = f2.user WHERE f1.user = ? AND f1.friend = ?',
+      [reqUser?.id, real[0].userFk]
+    );
+    if (friendshipFromAndToUser.length === 0 || !friendshipFromAndToUser[0]) {
+      return sendResponse.error(res, 'You are not friends with this user');
+    }
+    next();
+  },
+
   // const latestRealForUser = await db.query(
   //   `SELECT * FROM reals WHERE userFk = ? ORDER BY createdAt DESC LIMIT 1`,
   //   [reqUser?.id]

@@ -82,6 +82,12 @@ async function initDb() {
 
   commands.push('ALTER TABLE `user` ADD UNIQUE KEY `email` (`email`)');
   commands.push('ALTER TABLE `user` ADD UNIQUE KEY `username` (`username`)');
+  commands.push(
+    'ALTER TABLE `reals` ADD UNIQUE KEY `frontPathUnique` (`frontPath`)'
+  );
+  commands.push(
+    'ALTER TABLE `reals` ADD UNIQUE KEY `backPathUnique` (`backPath`)'
+  );
   commands.push("INSERT INTO `role` (`id`, `title`) VALUES (1, 'user')");
   commands.push("INSERT INTO `role` (`id`, `title`) VALUES (2, 'admin')");
   commands.push(

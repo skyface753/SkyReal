@@ -8,6 +8,7 @@ import reals from './reals';
 import friends from './friends';
 import search from './search';
 import Middleware from '../middleware';
+import RealsService from '../services/reals';
 const router = express.Router();
 
 // Routes
@@ -23,6 +24,7 @@ router.use('/search', search);
 router.use(
   '/uploads/reals',
   Middleware.authUser,
+  RealsService.checkIfUserMayAccessReal,
   express.static('uploads/reals')
 );
 export default router;

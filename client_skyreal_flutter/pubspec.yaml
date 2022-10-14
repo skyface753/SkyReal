@@ -50,6 +50,7 @@ dependencies:
   path_provider:
   path:
   flutter_hooks: ^0.18.5+1
+  table_calendar: ^3.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter
