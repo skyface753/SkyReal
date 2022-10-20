@@ -45,6 +45,7 @@ class RealTimeMaster:
         self.currentRealTime = random_timestamp()
         self.thread = Thread(target=self.update, args=())
         self.thread.daemon = True
+        self.printCounter = 0
         self.thread.start()
     def getRealTime(self):
         return self.currentRealTime
@@ -58,7 +59,9 @@ class RealTimeMaster:
                 response = onesignalClient.send_notification(notification_body)
                 print('Notification send', response.body)                
             readableCurrentRealTime = datetime.datetime.fromtimestamp(self.currentRealTime)
-            print("Current Real Time: " + str(readableCurrentRealTime))
+            if self.printCounter % 10 == 0:
+                print("Next Real Time: " + str(readableCurrentRealTime))
+            self.printCounter += 1
             time.sleep(1)
 
 

@@ -1,4 +1,5 @@
 import 'package:skyreal/bloc/auth_bloc.dart';
+import 'package:skyreal/pages/memories.dart';
 import 'package:skyreal/pages/twofactor_settings.dart';
 import 'package:skyreal/services/dio_service.dart';
 import 'package:dio/dio.dart';
@@ -98,6 +99,19 @@ class _SettingsPageState extends State<SettingsPage> {
             ))
           : ListView(
               children: [
+                ButtonBar(
+                  alignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MemoriesPage()));
+                        },
+                        child: Text("Memories")),
+                  ],
+                ),
                 ListTile(
                   title: Text('Username'),
                   subtitle: Text(settingsData!.username),

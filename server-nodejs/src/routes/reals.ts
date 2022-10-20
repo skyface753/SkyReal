@@ -56,4 +56,5 @@ router.put(
 // );
 // router.get('/own/back', Middleware.authUser, RealsService.getOwnLatestRealBack);
 router.get('/own', Middleware.authUser, RealsService.getOwnLatestReal);
+router.get('/own/all', Middleware.authUser, RealsService.getAllOwn);
 export default router;

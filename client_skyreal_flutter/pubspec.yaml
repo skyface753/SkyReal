@@ -51,6 +51,8 @@ dependencies:
   path:
   flutter_hooks: ^0.18.5+1
   table_calendar: ^3.0.7
+  syncfusion_flutter_calendar: ^20.3.49
+  connectivity: ^3.0.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

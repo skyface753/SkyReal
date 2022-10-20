@@ -1,6 +1,9 @@
 PODS:
   - camera_avfoundation (0.0.1):
     - Flutter
+  - connectivity (0.0.1):
+    - Flutter
+    - Reachability
   - DKImagePickerController/Core (4.3.4):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
@@ -56,6 +59,7 @@ PODS:
     - OneSignalXCFramework/OneSignalCore
   - path_provider_ios (0.0.1):
     - Flutter
+  - Reachability (3.2)
   - SDWebImage (5.13.2):
     - SDWebImage/Core (= 5.13.2)
   - SDWebImage/Core (5.13.2)
@@ -66,6 +70,7 @@ PODS:
 
 DEPENDENCIES:
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
+  - connectivity (from `.symlinks/plugins/connectivity/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
@@ -80,12 +85,15 @@ SPEC REPOS:
     - DKPhotoGallery
     - FMDB
     - OneSignalXCFramework
+    - Reachability
     - SDWebImage
     - SwiftyGif
 
 EXTERNAL SOURCES:
   camera_avfoundation:
     :path: ".symlinks/plugins/camera_avfoundation/ios"
+  connectivity:
+    :path: ".symlinks/plugins/connectivity/ios"
   file_picker:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
@@ -101,6 +109,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   camera_avfoundation: 07c77549ea54ad95d8581be86617c094a46280d9
+  connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
@@ -110,6 +119,7 @@ SPEC CHECKSUMS:
   onesignal_flutter: 02a850e079073e8bd03948f50a2fb9a7918b5db6
   OneSignalXCFramework: 81ceac017a290f23793443323090cfbe888f74ea
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SDWebImage: 72f86271a6f3139cc7e4a89220946489d4b9a866
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780

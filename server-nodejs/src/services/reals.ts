@@ -286,5 +286,18 @@ const RealsService = {
   //   });
   // }
   //   },
+  getAllOwn: async (req: IUserFromCookieInRequest, res: Response) => {
+    const reqUser = req.user;
+    const allRealsForUser = await db.query(
+      `SELECT * FROM reals WHERE userFk = ? ORDER BY createdAt DESC`,
+      [reqUser?.id]
+    );
+    if (allRealsForUser.length === 0) {
+      return sendResponse.success(res, { reals: [] });
+    }
+    sendResponse.success(res, {
+      reals: allRealsForUser,
+    });
+  },
 };
 export default RealsService;
