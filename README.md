@@ -1,22 +1,22 @@
-# A Template Repository for Nodejs (server) with React and Flutter (client)
+# SkyReal - A BeReal clone made with flutter, nodejs and mariadb
 
-## Contains
+## What is SkyReal?
 
-- NodeJs (server)
-- ReactJs (client)
-- Flutter (client)
-- Database (MySQL)
+Every day at a different time, everyone is notified simultaneously to capture and share a Photo in 2 Minutes.
 
-## First steps
+## Screenshots
 
-1. Use this repository as template
-2. Change username and password of the database in docker-compose-debug.yml
-3. Change the name of the project in package.json (server and clients)
-4. Change the name of the project in pubspec.yaml (client-flutter)
-5. Follow the steps in the README of the [server](server-nodejs/README.md) and [client-reactjs](client-reactjs/README.md) and [client-flutter](client-flutter/README.md)
+<img src="./assets/images/home.png" width="200" />
 
-## TODO
+## Default Credentials
 
-- [] Flutter - all
-- [] React - Profile
-- [] NodeJs - mongodb for files
+justANormalUser: User123
+
+## Tech Stack
+
+- Flutter (Client)
+- NodeJS (Server)
+- MariaDB (Database)
+- Python (Notifcation Service)
+- Redis (Storage for the timer)
+- OneSignal (Push Notifications)
